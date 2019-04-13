@@ -316,14 +316,14 @@
 						data:updata,
 						success: function(data) {
 							vue.isLast = data.data.last || false;
-							if(pageNo == 1) vue.items = data.data.content || [];
-							else vue.items.concat(data.data.content || []);
-							
-							vue.items = vue.items.map(function(item){
-								item.img = App.config.serverUrl + item.img;
-								item.publishTime = App.util.dateFormat(item.publishTime);
-								return item;
-							})
+							var newpage = data.data.content || [];
+							newpage = newpage.map(function(item){
+                                item.img = App.config.serverUrl + item.img;
+                                item.publishTime = App.util.dateFormat(item.publishTime);
+                                return item;
+                            }); 
+							if(pageNo == 1) vue.items = newpage;
+                            else vue.items.concat(newpage);
 						}
 					})
 				}
