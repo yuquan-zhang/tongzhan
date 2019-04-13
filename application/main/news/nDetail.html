@@ -9,6 +9,15 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<link href="../../css/mui.min.css" rel="stylesheet" />
 		<link href="../../css/app.css" rel="stylesheet" />
+		<style>
+			#newsDetail {
+				width: 100%;
+				padding: 0.2em;
+			}
+			#newsDetail img {
+				width: 90%;
+			}
+		</style>
 	</head>
 
 	<body>
@@ -24,7 +33,7 @@
 		        			<div style="padding: 5px;">
 		        				<h4>{{item.title}}</h4>
 			            		<p><span>{{item.publishTime}}</span>&nbsp;|&nbsp;<span>{{item.origin}}</span></p>
-			            		<div v-html="item.detail">
+			            		<div id="newsDetail" v-html="item.detail">
 			            		</div>
 		        			</div>
 		        		</div>
@@ -48,7 +57,7 @@
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
 				vm.item = e.detail.item;
-				console.log(JSON.stringify(vm.item));
+				vm.item.detail = vm.item.detail.replace(/(img src=\")(\/userfile\/ueditor\/upload\/image\/[\w|\d|\/]*\.\w{1,5})(\")/g,"$1" + App.config.serverUrl + "$2$3");
 			},false);
 			
 			(function($,doc){

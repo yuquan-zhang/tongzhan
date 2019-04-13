@@ -44,7 +44,7 @@
 			});
 			
 			var thisView = {
-				data: App.getData("currentUser") || null
+				data: null
 			};
 			
 			function hasLogined() {
@@ -84,6 +84,7 @@
 			thisView.subMap = {};
 	        
 	        mui.plusReady(function(){
+	        	thisView.data = App.getData("currentUser") || null;
 	        	var self = plus.webview.currentWebview();
 				for (var i = 0; i < 4; i++) {
 					var sub = plus.webview.create(subpages[i], subpages[i], subpage_style);
