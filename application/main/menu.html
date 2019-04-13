@@ -48,7 +48,6 @@
 			};
 			
 			function hasLogined() {
-				console.log(JSON.stringify(thisView.data));
 				return thisView.data != null;
 			}
 			
@@ -68,27 +67,30 @@
 			
 			var aniShow = {};
 			
+			function openActiveTab(){
+				var activeView = plus.webview.getWebviewById(activeTab);
+				mui.fire(activeView,"data_transfer",{
+					data:thisView.data
+				})
+			}
+			
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = App.getData("currentUser");
 				if(activeTab != null) {
-					var activeView = plus.webview.getWebviewById(activeTab);
-					mui.fire(activeView,"data_transfer",{
-						data:thisView.data
-					})
+					openActiveTab();
 				}
 			},false);
+			
+			thisView.subMap = {};
 	        
 	        mui.plusReady(function(){
 	        	var self = plus.webview.currentWebview();
 				for (var i = 0; i < 4; i++) {
-					var temp = {};
 					var sub = plus.webview.create(subpages[i], subpages[i], subpage_style);
 					if (i > 0) {
 						sub.hide(); 
-					}else{
-						temp[subpages[i]] = "true";
-						mui.extend(aniShow,temp);
 					}
+					thisView.subMap[subpages[i]] = sub;
 					self.append(sub);
 				}
 				
@@ -139,21 +141,14 @@
 					}
 				}
 				//获取目标webview object
-				var targetView = plus.webview.getWebviewById(targetTab);
+				var targetView = plus.webview.getWebviewById(targetTab) || thisView.subMap[targetTab];
 				mui.fire(targetView,"data_transfer",{
 					data:thisView.data
 				})
-				//更换标题
-//				title.innerHTML = this.querySelector('.mui-tab-label').innerHTML;
-				//显示目标选项卡
-				//若为iOS平台或非首次显示，则直接显示
-				if(mui.os.ios||aniShow[targetTab]){
+				//若为iOS平台,则直接显示
+				if(mui.os.ios){
 					plus.webview.show(targetTab);
 				}else{
-					//否则，使用fade-in动画，且保存变量
-					var temp = {};
-					temp[targetTab] = "true";
-					mui.extend(aniShow,temp);
 					plus.webview.show(targetTab,"fade-in",300);
 				}
 				//隐藏当前;
