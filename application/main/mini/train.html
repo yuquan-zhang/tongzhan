@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link href="../../css/app.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				padding: 10px;
+			}
+			.zui_footer {
+				padding: 0px;
+				bottom: 0px;
+				position: absolute;
+				z-index: 10;
+				width: 100%;
+				border-top: 1px outset lightgray;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">培训详情</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-scroll-wrapper zui-scroll-wrapper" style="top:46px;bottom: 40px;">
+		        <div class="mui-scroll">
+		            <div id="vue1">
+		        			<img width="100%" :src="item.videoPath"/>
+		        			<div style="padding: 5px;">
+		        				<h4>{{item.title}}&nbsp;|&nbsp;<span>{{item.speaker}}</span></h4>
+			            		<p><span ><b>日期</b>：{{App.util.dateFormat(item.speakDate).split(' ')[0]}}</span>&nbsp;|&nbsp;<span><b>时间</b>：{{item.speakTime}}</span></p>
+			            		<div v-html="item.summary">
+			            		</div>
+		        			</div>
+		        		</div>
+		        </div>
+		    </div>
+		    <div class="zui_footer">
+			    	<button id="apply" type="button" class="mui-btn mui-btn-blue mui-btn-block" disabled="disabled">已报名</button>
+			</div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/vue.min.js"></script>
+		<script src="../../js/app.js"></script>
+		<script type="text/javascript">
+			
+			var vm = new Vue({
+				el: "#vue1",
+				data: {
+					item: {}
+				}
+			})
+			
+			var thisView = {};
+				
+			window.addEventListener("data_transfer",function(e){
+				thisView.data = e.detail.data;
+				vm.item = e.detail.item;
+				var applyBtn = document.getElementById("apply");
+				if(vm.item.isLearned) {
+					applyBtn.innerText = '已报名';
+					apply.setAttribute("disabled","disabled");
+				}else {
+					applyBtn.innerText = '报名';
+					apply.removeAttribute("disabled");
+				}
+			},false);
+			
+			(function($,doc){
+				$.init();
+				//阻尼系数 
+				var deceleration = $.os.ios?0.003:0.0009;
+				$('.mui-scroll-wrapper').scroll({
+					bounce: false,
+					indicators: true, //是否显示滚动条
+					deceleration:deceleration
+				});
+				
+				$.plusReady(function(){
+					document.getElementById("apply").addEventListener("tap",function(e){
+						$.confirm("确定报名吗？","提示",["取消","确定"],function(e) {
+		                    if (e.index != 1) return;
+		                    var updata = {
+			                    memberId:thisView.data.id,
+		                        weikeId:vm.item.id,
+			                }
+							App.ajax({
+								line: 96,
+								url: "/front/study/complete.do",
+								data:updata,
+								success: function(data) {
+									mui.alert(data.data,"提示","好的",function(e){
+										$.back();
+									})
+								}
+							})
+		                });
+					});
+				})
+			})(mui,document);
+			
+			var oldBack = mui.back;
+			mui.back = function() {
+				var opener = plus.webview.currentWebview().opener();
+				opener.evalJS("refresh()");
+				oldBack();
+			}
+		</script>
+	</body>
+
+</html>

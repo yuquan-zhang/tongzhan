@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link href="../../css/app.css" rel="stylesheet" />
+		<style>
+			li{
+				list-style-type: none !important;
+			}
+			.mui-btn {
+				padding: 10px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">我</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-scroll-wrapper zui-scroll-wrapper"
+		        <div class="mui-scroll">
+		        		<div id="vue1">
+			            <ul class="mui-table-view">
+							<li class="mui-table-view-cell mui-media">
+								<a href="javascript:;">
+									<img class="mui-media-object mui-pull-left" src="../../img/user-background.jpg">
+									<div class="mui-media-body">
+										你好
+										<p class='mui-ellipsis'>{{account.userName}}</p>
+									</div>
+								</a>
+							</li>
+						</ul>
+						<div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					        <li id="identity" class="mui-table-view-cell">
+					            <a class="mui-navigate-right">
+					                <b><span class="mui-icon mui-icon-camera"></span>身份认证</b>
+					                <span v-if="member.idNo" class="mui-pull-right">已认证</span>
+					            </a>
+					        </li>
+					    </div>
+					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					        <li id="modify" class="mui-table-view-cell">
+					            <a class="mui-navigate-right">
+					                <b><span class="mui-icon mui-icon-gear"></span>修改密码</b>
+					            </a>
+					        </li>
+					    </div>
+					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					        <li id="phone" class="mui-table-view-cell">
+					            <a class="mui-navigate-right">
+					                <b><span class="mui-icon mui-icon-phone"></span>绑定手机</b>
+					                <span v-if="member.phone" class="mui-pull-right">已绑定</span>
+					            </a>
+					        </li>
+					    </div>
+					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					        <li id="email" class="mui-table-view-cell">
+					            <a class="mui-navigate-right">
+					                <b><span class="mui-icon mui-icon-email"></span>绑定邮箱</b>
+					                <span v-if="member.email" class="mui-pull-right">已绑定</span>
+					            </a>
+					        </li>
+					    </div>
+					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					        <li id="feedback" class="mui-table-view-cell">
+					            <a class="mui-navigate-right">
+					                <b><span class="mui-icon mui-icon-refresh"></span>意见反馈</b>
+					            </a>
+					        </li>
+					    </div>
+					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					        <li class="mui-table-view-cell">
+					            <a class="">
+					                <b><span class="mui-icon mui-icon-star"></span>我的积分</b>
+					                <span class="mui-pull-right">{{member.score}}分</span>
+					            </a>
+					        </li>
+					    </div>
+					    <br />
+					    <button id="quit" type="button" class="mui-btn mui-btn-danger mui-btn-block">退出</button>
+		        		</div>
+			        		
+		        </div>
+		    </div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/vue.min.js"></script>
+		<script src="../../js/app.js"></script>
+		<script type="text/javascript">
+			(function($,doc){
+				$.init();
+				//阻尼系数 
+				var deceleration = $.os.ios?0.003:0.0009;
+				$('.mui-scroll-wrapper').scroll({
+					bounce: false,
+					indicators: true, //是否显示滚动条
+					deceleration:deceleration
+				});
+				
+				var vm = new Vue({
+					el: "#vue1",
+					data: {
+						member: {},
+						account: {}
+					}
+				})
+				
+				var thisView = {};
+				var identityView = null;
+				var modifyView = null;
+				var phoneView = null;
+				var emailView = null;
+				var feedbackView = null;
+				
+				window.addEventListener("data_transfer",function(e){
+					console.log(JSON.stringify(e.detail.data));
+					thisView.data = e.detail.data;
+					vm.member = thisView.data || {};
+					vm.account = vm.member.webAccount || {};
+				},false);
+				
+				$.plusReady(function(){
+					
+					identityView = mui.preload({
+						url:'identity.html',
+						id: App.name + 'identity.html',
+						styles:{
+							popGesture:'hide'
+						},//窗口参数
+					});
+					
+					modifyView = mui.preload({
+						url:'modify.html',
+						id: App.name + 'modify.html',
+						styles:{
+							popGesture:'hide'
+						},//窗口参数
+					});
+					phoneView = mui.preload({
+						url:'phone.html',
+						id: App.name + 'phone.html',
+						styles:{
+							popGesture:'hide'
+						},//窗口参数
+					});
+					emailView = mui.preload({
+						url:'email.html',
+						id: App.name + 'email.html',
+						styles:{
+							popGesture:'hide'
+						},//窗口参数
+					});
+					feedbackView = mui.preload({
+						url:'feedback.html',
+						id: App.name + 'feedback.html',
+						styles:{
+							popGesture:'hide'
+						},//窗口参数
+					});
+					
+					function openPreview(preview) {
+						$.fire(preview,"data_transfer",{
+							data:thisView.data
+						})
+						preview.show("pop-in",300);
+					}
+					
+					var identityBtn = doc.getElementById('identity');
+					var modifyBtn = doc.getElementById('modify');
+					var phoneBtn = doc.getElementById('phone');
+					var emailBtn = doc.getElementById('email');
+					var feedbackBtn = doc.getElementById('feedback');
+					identityBtn.addEventListener('tap', function(event) {
+						openPreview(identityView);
+					}, false);
+					modifyBtn.addEventListener('tap', function(event) {
+						openPreview(modifyView);
+					}, false);
+					phoneBtn.addEventListener('tap', function(event) {
+						openPreview(phoneView);
+					}, false);
+					emailBtn.addEventListener('tap', function(event) {
+						openPreview(emailView);
+					}, false);
+					feedbackBtn.addEventListener('tap', function(event) {
+						openPreview(feedbackView);
+					}, false);
+				})
+				
+				doc.getElementById("quit").addEventListener("tap",function() {
+					$.confirm("确定退出吗？","提示",["取消","确定"],function(e){
+						if(e.index != 1) return;
+						App.setData("currentUser",null);
+						if($.os.ios) {
+							plus.webview.getLaunchWebview().evalJS("openLoginView()");
+						}else{
+							plus.runtime.quit();
+						}
+					})
+				})
+				
+				var oldBack = $.back;
+				$.back = function() {
+					mui.fire(plus.webview.currentWebview().opener(),"data_transfer",{
+						data:{}
+					})
+					oldBack();
+				}
+			})(mui,document);
+		</script>
+	</body>
+
+</html>
