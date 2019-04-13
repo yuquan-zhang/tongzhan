@@ -57,7 +57,7 @@
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
 				vm.item = e.detail.item;
-				vm.item.detail = vm.item.detail.replace(/(img src=\")(\/userfile\/ueditor\/upload\/image\/[\w|\d|\/]*\.\w{1,5})(\")/g,"$1" + App.config.serverUrl + "$2$3");
+				vm.item.detail = vm.item.detail.replace(/(img[^\<|\>]* src=\")(\/userfile\/ueditor\/upload\/image\/[\w|\d|\/]*\.\w{1,5})(\")/g,"$1" + App.config.serverUrl + "$2$3");
 			},false);
 			
 			(function($,doc){

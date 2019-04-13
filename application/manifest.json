@@ -172,5 +172,94 @@
                 }
             }
         }
-    }
+    },
+	"dependencies": {
+		"pages": {
+			"main/menu.html": {
+				"resources": [],
+				"refer": [
+					"main/sug/index.html",
+					"main/mini/index.html",
+					"main/news/index.html",
+					"main/acti/index.html",
+					"main/user/index.html",
+					"index.html"
+				],
+				"priority": 0
+			},
+			"main/user/index.html": {
+				"resources": [],
+				"refer": [
+					"main/user/email.html",
+					"main/user/phone.html",
+					"main/user/identity.html",
+					"main/user/modify.html",
+					"main/user/feedback.html"
+				],
+				"priority": 0
+			},
+			"main/sug/index.html": {
+				"resources": [],
+				"refer": [
+					"main/sug/sDetail.html",
+					"main/sug/submit.html",
+					"main/sug/draft.html"
+				],
+				"priority": 0
+			},
+			"main/mini/index.html": {
+				"resources": [],
+				"refer": [
+					"main/mini/train.html",
+					"main/mini/video.html",
+					"main/mini/docs.html"
+				],
+				"priority": 0
+			},
+			"main/news/index.html": {
+				"resources": [],
+				"refer": [
+					"main/news/nDetail.html"
+				],
+				"priority": 0
+			},
+			"main/sug/draft.html": {
+				"resources": [],
+				"refer": [
+					"main/sug/submit.html"
+				],
+				"priority": 0
+			},
+			"main/acti/index.html": {
+				"resources": [],
+				"refer": [
+					"main/acti/aDetail.html"
+				],
+				"priority": 0
+			}
+		},
+		"idle": {
+			"resources": [
+				"js/mui.picker.min.js",
+				"img/play.png",
+				"js/vue.min.js",
+				"LICENSE",
+				"js/mui.min.js",
+				"forget_password.html",
+				"css/mui.picker.min.css",
+				"js/mui.js",
+				"js/mui.pullToRefresh.js",
+				"js/app.js",
+				"js/mui.pullToRefresh.material.js",
+				"fonts/mui.ttf",
+				"reset_password.html",
+				"reg.html",
+				"img/user-background.jpg",
+				"css/mui.css",
+				"css/app.css",
+				"main/user/template.html",
+				"css/mui.min.css"
+			]
+		}
+	}
 }

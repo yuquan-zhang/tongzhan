@@ -200,11 +200,7 @@
 					$.confirm("确定退出吗？","提示",["取消","确定"],function(e){
 						if(e.index != 1) return;
 						App.setData("currentUser",null);
-						if($.os.ios) {
-							plus.webview.getLaunchWebview().evalJS("openLoginView()");
-						}else{
-							plus.runtime.quit();
-						}
+						plus.webview.getLaunchWebview().evalJS("openLoginView()");
 					})
 				})
 				

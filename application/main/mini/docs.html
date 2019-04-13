@@ -24,6 +24,14 @@
 			.icons > .mui-icon {
 				color: dodgerblue;
 			}
+			
+			#newsDetail {
+				width: 100%;
+				padding: 0.2em;
+			}
+			#newsDetail img {
+				width: 90%;
+			}
 		</style>
 	</head>
 
@@ -50,7 +58,7 @@
 								</div>
 								<span id="evaluate" class="mui-btn-green mui-pull-right">提交评价</span>
 			            		</P>
-			            		<div v-html="item.detail">
+			            		<div id="newsDetail" v-html="item.detail">
 			            		</div>
 		        			</div>
 		        		</div>
@@ -77,6 +85,7 @@
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
 				vm.item = e.detail.item;
+				vm.item.detail = vm.item.detail.replace(/(img[^\<|\>]* src=\")(\/userfile\/ueditor\/upload\/image\/[\w|\d|\/]*\.\w{1,5})(\")/g,"$1" + App.config.serverUrl + "$2$3");
 				App.util.print(80,vm.item);
 				var applyBtn = document.getElementById("apply");
 				if(vm.item.isLearned) {
