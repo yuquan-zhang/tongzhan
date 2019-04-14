@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link href="../../css/app.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">我的消息</h1>
+		</header>
+		<div class="mui-content">
+			<div id="pullrefresh" class="mui-scroll-wrapper" style="top: 44px;">
+				<div class="mui-scroll">
+					<!--数据列表-->
+					<ul id="vue1" class="mui-table-view">
+						<div v-for="item in items" >
+							<div class="mui-card">
+								<div class="mui-card-header">
+						            <h5 class="text-center">{{App.util.dateFormat(item.createTime)}}</h5>
+						        </div>
+								<div class="mui-card-content">
+									<div class="mui-card-content-inner">
+						                <b>标题：{{item.title}}</b><br/><br/>
+						                <p><b>内容：</b>{{item.content}}</p>
+									</div>
+								</div>
+								<div class="mui-card-footer">
+									<a style="color: lightcoral;" class="mui-card-link"><b>状态：</b>{{item.status}}</a>
+						            <a @tap="openRecord(item)" class="mui-card-link">查看详情</a> 
+								</div>
+							</div>
+						</div>
+					</ul>
+				</div>
+			</div>
+				
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/vue.min.js"></script>
+		<script src="../../js/app.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				swipeBack: false,
+				pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						callback: pulldownRefresh
+					},
+					up: {
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				}
+			});
+			
+			var vm = new Vue({
+				el: "#vue1",
+				data: {
+					items: [],
+					pageNo: 1,
+					isLast: false
+				}
+			});
+			
+			var thisPage = {
+				pageSize: 10,
+			}
+			
+			var deleteItem = function(){};
+			var openRecord = function(){};
+			
+			var recordView = null;
+			
+			var thisView = {};
+			
+			function getDictionary(dictionaryCode, obj, key) {
+				App.ajax({
+					line: 154,
+					url: "/front/suggest/getDictionary.do",
+					data:{
+						dictionaryCode : dictionaryCode
+					},
+					success: function(data) {
+						obj[key] = data.data || [];
+					}
+				})
+			}
+			
+			(function (advise) {
+				advise.getNameInList = function (list, value) {
+					for(var i = 0; i < list.length; ++i) {
+						if(value == list[i].val) {
+							return list[i].title;
+						}
+					}
+					return '';
+				}
+				var obj = {};
+				getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
+				advise.getStatusName = function(value) {
+					return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
+				}
+			})(window.advise = {});
+			
+			function updateMessageStatus(messageId) {
+				App.ajax({
+					line: 89,
+					url: "/front/suggest/updateMessageStatus.do",
+					data:{
+						messageId:messageId
+					},
+					success: function (data) {
+						
+					}
+				});
+			}
+						
+			function getMessages(vue,pageNo) {
+				App.ajax({
+					line: 110,
+					url: "/front/suggest/getMessages.do",
+					data:{
+						receiveUserId:thisView.data.webAccount.id || '',
+						pageSize:thisPage.pageSize,
+						pageNo:pageNo,
+					},
+					success: function(data) {
+						var others = data.data.content || [];
+						if(pageNo == 1) vue.items = others || [];
+						else vue.items.concat(others);
+						vue.isLast = others.length < thisPage.pageSize;
+					}
+				})
+			}
+							
+			window.addEventListener("data_transfer",function(e){
+				thisView.data = e.detail.data;
+				getMessages(vm,1);
+				console.log("data_transfer");
+			},false);
+			
+			mui.plusReady(function() {
+								
+				recordView = mui.preload({
+					url:'record.html',
+					id: App.name + 'message/record.html',
+					styles:{
+						popGesture: 'hide',
+					},//窗口参数
+					extras:{}//自定义扩展参数
+				})
+				
+				openRecord = function(item) {
+					var id = App.util.getURLParam('id',item.href);
+					updateMessageStatus(item.id);
+					App.ajax({
+						line: 110,
+						url: "/front/suggest/getSuggest.do",
+						data:{
+							id:id
+						},
+						success: function(data) {
+							var suggest = data.data || {};
+							suggest.status = advise.getStatusName(suggest.status);
+							mui.fire(recordView,"data_transfer",{
+								data:thisView.data,
+								suggest:suggest,
+							})
+							recordView.show("pop-in",300);
+						}
+					})
+				}
+				
+			})
+			
+			/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					getMessages(vm,1); 
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
+				}, 1500);
+			}
+			var count = 0;
+			/**
+			 * 上拉加载具体业务实现
+			 */
+			function pullupRefresh() {
+				setTimeout(function() {
+					getMessages(vm,vm.pageNo++); 
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh(vm.isLast); //参数为true代表没有更多数据了。
+				}, 1500);
+			}
+			
+		</script>
+	</body>
+
+</html>

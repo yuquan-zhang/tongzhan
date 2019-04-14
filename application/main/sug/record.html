@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link href="../../css/app.css" rel="stylesheet" />
+		<style>
+			div.mui-card-footer {
+				border: none;
+				border-bottom: 1px solid #F0F0F0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">审核记录</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-scroll-wrapper" style="top: 44px; bottom: 0;">
+		        <div class="mui-scroll">
+					<div id="vue1" class="mui-card">
+						<div class="mui-card-header">
+					        <b>约稿主题：{{suggest.manuscripts.title}}</b>
+					    </div>
+						<div class="mui-card-footer">
+							<a style="color: lightcoral;" class="mui-card-link"><b>状态：</b>{{suggest.status}}</a>
+						    <a style="color: black;" class="mui-card-link"><b>建言人：</b>{{suggest.createUser.userName}}</a>
+						</div>
+						<div class="mui-card-content">
+							<div class="mui-card-content-inner">
+					            <h4 style="text-align: center;"><b>标题：{{suggest.title}}</b><br/></h4><br/>
+					            <p><b>内容：</b>{{suggest.content}}</p>
+								<br/>
+							</div>
+						</div>
+						<h5 class="text-center">审核日志</h5>
+						<ul>
+							<li v-for="task in taskList">
+								{{advise.getTaskName(task.task)}}
+								{{App.util.dateFormat(task.dueTime)}}<br/>
+								<span v-if="task.variables != null" style="color:red;">
+									审批结果：{{advise.getAuditResultName(task.variables.auditResult)}}<br/>
+									<b v-if="task.variables.auditComment != null">修改意见：{{task.variables.auditComment}}</b>
+								</span>
+							</li>
+						</ul>
+					</div>
+		        </div>
+		    </div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/vue.min.js"></script>
+		<script src="../../js/app.js"></script>
+		<script type="text/javascript">
+			(function($,doc){
+				$.init();
+				//阻尼系数 
+				var deceleration = $.os.ios?0.003:0.0009;
+				$('.mui-scroll-wrapper').scroll({
+					bounce: false,
+					indicators: true, //是否显示滚动条
+					deceleration:deceleration
+				});
+				
+				
+				
+				var vm = new Vue({
+					el: "#vue1",
+					data: {
+						suggest:{
+							manuscripts: {},
+							createUser: {},
+							content: ''
+						},
+						isExplored: false,
+						taskList: []
+					},
+					methods: {
+						toggleExplore: function () {
+							this.isExplored = !this.isExplored;
+						}
+					}
+				})
+				
+				var thisView = {};
+				
+				function getDictionary(dictionaryCode, obj, key) {
+					App.ajax({
+						line: 154,
+						url: "/front/suggest/getDictionary.do",
+						data:{
+							dictionaryCode : dictionaryCode
+						},
+						success: function(data) {
+							obj[key] = data.data || [];
+						}
+					})
+				}
+				
+				function getSuggestTasVariables(task) {
+					App.ajax({
+						line:109,
+						url: "/front/suggest/getSuggestTaskVariables.do",
+						data:{
+							taskId: task.id || ''
+						},
+						success: function (data) {
+							var list = data.data || [];
+							var variables = {};
+							list.forEach(function (item) {
+								variables[item.param] = item.value;
+							})
+							if(list.length > 0) {
+								task.variables = variables;
+							}else{
+								task.variables = null;
+							}
+							vm.taskList.push(task);
+						}
+					});
+				}
+
+				(function (advise) {
+					advise.getNameInList = function (list, value) {
+						for(var i = 0; i < list.length; ++i) {
+							if(value == list[i].val) {
+								return list[i].title;
+							}
+						}
+						return '';
+					}
+					var obj = {};
+					getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
+					advise.getStatusName = function(value) {
+						return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
+					}
+					getDictionary('SUGGEST_TASK',obj,'SUGGEST_TASK');
+					advise.getTaskName = function(value) {
+						return advise.getNameInList(obj['SUGGEST_TASK'] || [],value);
+					}
+					getDictionary('SUGGEST_USER_TYPE',obj,'SUGGEST_USER_TYPE');
+					advise.getUserTypeName = function(value) {
+						return advise.getNameInList(obj['SUGGEST_USER_TYPE'] || [],value);
+					}
+
+					getDictionary('AUDIT_RESULT',obj,'AUDIT_RESULT');
+					advise.getAuditResultName = function(value) {
+						return advise.getNameInList(obj['AUDIT_RESULT'] || [],value);
+					}
+
+				})(window.advise = {});
+				
+				window.addEventListener("data_transfer",function(e){
+					thisView.data = e.detail.data;
+					vm.suggest = thisView.suggest = e.detail.suggest || {};
+					App.ajax({
+						line: 163,
+						url: "/front/suggest/getSuggestTaskList.do",
+						data:{
+							id:vm.suggest.id || ''
+						},
+						success: function (data) {
+							var list = data.data || [];
+							for (var i=0,len=list.length; i <len; ++i) {
+								getSuggestTasVariables(list[i]);
+							}
+						}
+					});
+				},false);
+			})(mui,document);
+		</script>
+	</body>
+
+</html>

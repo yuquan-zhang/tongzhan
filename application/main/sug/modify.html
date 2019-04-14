@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link href="../../css/mui.picker.min.css" rel="stylesheet" />
+		<link href="../../css/app.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">修改建言</h1>
+		</header>
+		<div class="mui-content">
+		    <div class="mui-scroll-wrapper zui-scroll-wrapper"
+		        <div class="mui-scroll">
+		            <!--这里放置真实显示的DOM内容-->
+		            <form id="vue1" class="mui-input-group">
+						<input type="hidden" v-model="suggest.id" name="id" id="id">
+						<input type="hidden" v-model="task.id" name="taskId" id="taskId">
+						<input type="hidden" v-model="manuscripts.id" name="manuscriptsId" id="manuscriptsId">
+						<div class="mui-input-row">
+							<label>约稿主题</label>
+							<input id='subject' v-model="manuscripts.title" type="text" class="mui-input" placeholder="" readonly="readonly">
+						</div>						
+						<div class="mui-input-row">
+							<label>标题</label>
+							<input id='title' v-model="suggest.title" type="text" class="mui-input-clear mui-input" placeholder="请输入标题">
+						</div>
+						<textarea id='content' rows="15" cols="50" class="mui-input-clear mui-input" placeholder="内容:请输入您的建言献策">{{suggest.content}}</textarea>
+						<div class="mui-text-center"><b>打回修改意见：</b><span style="color: red;">{{auditComment}}</span></div>
+					</form>
+					<div class="mui-content-padded">
+						<button id='submitBtn' class="mui-btn mui-btn-primary mui-btn-block">提交</button>
+					</div>
+		        </div>
+		    </div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/mui.picker.min.js"></script>
+		<script src="../../js/vue.min.js"></script>
+		<script src="../../js/app.js"></script>
+		<script type="text/javascript">
+			
+			(function($,doc){
+				$.init();
+				//阻尼系数
+				var deceleration = $.os.ios?0.003:0.0009;
+				$('.mui-scroll-wrapper').scroll({
+					bounce: false,
+					indicators: true, //是否显示滚动条
+					deceleration:deceleration
+				});
+				
+				var vm = new Vue({
+					el: "#vue1",
+					data: {
+						suggest: {},
+						task: {},
+						manuscripts: {},
+						auditComment: ''
+					}
+				})
+				
+				var thisView = {};
+				
+				function getSuggestTasVariables(task) {
+					App.ajax({
+						line:109,
+						url: "/front/suggest/getSuggestTaskVariables.do",
+						data:{
+							taskId: task.id || ''
+						},
+						success: function (data) {
+							var list = data.data || [];
+							var variables = {};
+							list.forEach(function (item) {
+								variables[item.param] = item.value;
+							})
+							vm.auditComment = variables["auditComment"] || '';
+						}
+					});
+				}
+				
+				window.addEventListener("data_transfer",function(e){
+					thisView.data = e.detail.data;
+					vm.suggest = e.detail.suggest || {};
+					vm.task = e.detail.task || {};
+					vm.manuscripts = e.detail.manuscripts || {};
+					var task = {};
+					App.ajax({
+						url: "/front/suggest/getSuggestTaskList.do",
+						data:{
+							id:vm.suggest.id || ''
+						},
+						success: function (data) {
+							var list = data.data || [];
+							if(list.length > 0) {
+								task = list[list.length - 1];
+							}
+							getSuggestTasVariables(task);
+						}
+					});
+					
+				},false);
+				
+				$.plusReady(function(){
+					
+					function uploadData(url) {
+			      		var title = doc.getElementById("title").value;
+			      		var content = doc.getElementById("content").value;
+			      		if(App.util.isEmpty(title,"请输入标题")) return;
+			      		if(App.util.isEmpty(content,"请输入内容")) return;
+			      		var updata = {
+			      			createUserId:thisView.data.webAccount.id,
+			      			id:vm.suggest.id || '',
+							taskId: vm.task.id || '',
+							manuscriptsId: vm.manuscripts.id || '',
+			      			title:title,
+			      			content: content
+			      		}
+						App.ajax({
+							line: 123,
+							url: url,
+							data:updata,
+							success: function(data) {
+								mui.toast(data.data);
+								mui.back();
+							}
+						})
+					}
+					
+					doc.getElementById("submitBtn").addEventListener("tap",function(){
+						uploadData("/front/suggest/submit.do")
+					})
+				})
+			})(mui,document);
+			
+			var oldBack = mui.back;
+			mui.back = function() {
+				var opener = plus.webview.currentWebview().opener();
+				opener.evalJS("refresh()");
+				oldBack();
+			}
+		</script>
+	</body>
+
+</html>
