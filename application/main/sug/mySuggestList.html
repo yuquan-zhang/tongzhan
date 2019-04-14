@@ -127,7 +127,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-									            <b>约稿主题：{{item.manuscripts.title}}</b>
+									            <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
 									        </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
@@ -155,7 +155,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-									            <b>约稿主题：{{item.manuscripts.title}}</b>
+									            <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
 									        </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
@@ -183,7 +183,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-									            <b>约稿主题：{{item.manuscripts.title}}</b>
+									            <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
 									        </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
@@ -211,7 +211,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-									            <b>约稿主题：{{item.manuscripts.title}}</b>
+									            <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
 									        </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
@@ -239,7 +239,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-									            <b>约稿主题：{{item.manuscripts.title}}</b>
+									            <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
 									        </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
@@ -267,7 +267,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-									            <b>约稿主题：{{item.manuscripts.title}}</b>
+									            <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
 									        </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
@@ -388,7 +388,7 @@
 					line: 298,
 					url: "/front/suggest/status.do",
 					data:{
-						createUserId:thisView.data.webAccount.id || '',
+						createUserId:thisView.data == null ? '' : thisView.data.webAccount.id || '',
 						pageSize:pageSize,
 						pageNo:pageNo,
 						status:status || '',
@@ -478,7 +478,7 @@
 									setTimeout(function() {
 										getSuggests(vms[index],vms[index].pageNo++,statuses[index]);
 										self.endPullUpToRefresh(vms[index].isLast);
-									}, 1000);
+									}, 1000); 
 								}
 							}
 						});

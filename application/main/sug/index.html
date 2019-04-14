@@ -126,7 +126,7 @@
 									<div v-for="item in items" >
 										<div class="mui-card">
 											<div class="mui-card-header">
-                                                <b>约稿主题：{{item.manuscripts.title}}</b>
+                                                <b>约稿主题：{{item.manuscripts != null ? item.manuscripts.title : ''}}</b>
                                             </div>
 											<div class="mui-card-content">
 												<div class="mui-card-content-inner">
