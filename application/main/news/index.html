@@ -402,6 +402,7 @@
 				if(currentUser != null && currentUser.webAccount != null && currentUser.webAccount.authenticated == '1') {
 					mui.later(getManuscriptsPage(popup,1),1000);
 				}
+				getNewest(upHead,1);
 				for(var i = 0; i < 5; i++){
 					getNewsByGenre(genres[i],vms[i],pageSize,1,'');
 				}

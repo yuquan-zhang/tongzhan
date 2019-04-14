@@ -109,12 +109,12 @@
 	};
 	
 	owner.setData = function(key, value) {
-		if(!plus) return false;
+		if(typeof(plus) == 'undefined') return false;
 		plus.storage.setItem(App.name + key,JSON.stringify(value));
 	};
 	
 	owner.getData = function(key) {
-		if(!plus) return null;
+		if(typeof(plus) == 'undefined') return null;
 		return JSON.parse(plus.storage.getItem(App.name + key) || null);
 	}
 	
@@ -148,8 +148,12 @@
 			if(isTokenTimeout) return;
 		}
 		App.util.print(options.line,url,options.data || {}); 
-		var currentUser = App.getData("currentUser");
-		var wait = plus.nativeUI.showWaiting("处理中...");
+		var currentUser = null;
+		var wait = null;
+		if(typeof(plus) != 'undefined') {
+			currentUser = App.getData("currentUser");
+			wait = plus.nativeUI.showWaiting("处理中...");
+		} 
 		mui.ajax(url,{
 			async:true,//是否异步
 			crossDomain:true,//强制使用5+跨域
@@ -163,25 +167,28 @@
 				'login-token':currentUser ? currentUser.loginToken || '' : '',
 			},	              
 			success:function(data){
-				wait.close();
+				if(wait != null) wait.close();
 				//服务器返回响应，根据响应结果，分析是否登录成功；
 				if(data.success) {
 					options.success(data);
 				}else{
 					if("登陆令牌已失效，请重新登陆！" == data.message) {
-						App.setData("isTokenTimeout",true);
-                        mui.alert(data.message,"提示","确定",function () {
-                            if(typeof(plus) !== "undefined") {
-                                plus.webview.getLaunchWebview().evalJS("openLoginView()");
-                            }
-                        })
+						if(typeof(plus) !== "undefined") {
+                            plus.webview.getLaunchWebview().evalJS("openLoginView()");
+                        }
+//						App.setData("isTokenTimeout",true);
+//                      mui.alert(data.message,"提示","确定",function () {
+//                          if(typeof(plus) !== "undefined") {
+//                              plus.webview.getLaunchWebview().evalJS("openLoginView()");
+//                          }
+//                      })
 					} else {
                         mui.toast(data.message);
                     }
 				}
 			},
 			error:function(xhr,type,errorThrown){
-				wait.close();
+				if(wait != null) wait.close();
 				//异常处理；
 				App.util.print(options.lineNo,type,errorThrown);
 				mui.toast(App.getErrorText(type));
