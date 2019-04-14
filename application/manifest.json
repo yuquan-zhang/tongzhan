@@ -255,6 +255,14 @@
 					"main/sug/record.html"
 				],
 				"priority": 0
+			},
+			"main/sug/mySuggestList.html": {
+				"resources": [],
+				"refer": [
+					"main/sug/modify.html",
+					"main/sug/record.html"
+				],
+				"priority": 0
 			}
 		},
 		"idle": {
