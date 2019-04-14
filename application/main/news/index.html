@@ -261,6 +261,7 @@
 				swipeBack: false,
 			});
 			
+			
 			var pageSize = 5;
 			var vms = [];
 			
@@ -407,9 +408,12 @@
 				}
 			}
 			
+			var hasInited = false;
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
+				if(hasInited) return;
 				refresh();
+				hasInited = true;
 			},false);
 			
 			
@@ -494,8 +498,8 @@
 							up: {
 								callback: function() {
 									var self = this;
+									getNewsByGenre(genres[index],vms[index],pageSize,++vms[index].pageNo,'');
 									setTimeout(function() {
-										getNewsByGenre(genres[index],vms[index],pageSize,vms[index].pageNo++,'');
 										self.endPullUpToRefresh(vms[index].isLast);
 									}, 1000);
 								}

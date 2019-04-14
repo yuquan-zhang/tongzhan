@@ -474,8 +474,8 @@
 							up: {
 								callback: function() {
 									var self = this;
+									getSuggests(vms[index],++vms[index].pageNo,statuses[index]);
 									setTimeout(function() {
-										getSuggests(vms[index],vms[index].pageNo++,statuses[index]);
 										self.endPullUpToRefresh(vms[index].isLast);
 									}, 1000); 
 								}

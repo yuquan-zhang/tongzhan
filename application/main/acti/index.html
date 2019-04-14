@@ -188,10 +188,13 @@
 			var detailView = null;
 			var thisView = {};
 			
+			var hasInited = false;
 			window.addEventListener("data_transfer",function(e){
 				App.util.print(192,e.detail.data);
 				thisView.data = e.detail.data;
+				if(hasInited) return;
 				refresh();
+				hasInited = true;
 			},false);
 			
 			function refresh() {
@@ -300,8 +303,8 @@
 							up: {
 								callback: function() {
 									var self = this;
+									if(index == 0) getActivityByGenre(vms[index],pageSize,++vms[index].pageNo,'');
 									setTimeout(function() {
-										if(index == 0) getActivityByGenre(vms[index],pageSize,vms[index].pageNo++,'');
 										self.endPullUpToRefresh(vms[index].isLast);
 									}, 1000);
 								}

@@ -369,6 +369,8 @@
 						var others = data.data.content || [];
 						if(others.length > 0) {
 							vue.message = others[0] || {};
+						}else {
+							vue.message = {};
 						}
 					}
 				})
@@ -437,9 +439,12 @@
 				thisPage.init();
 			}
 			
+			var hasInited = false;
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
+				if(hasInited) return;
 				refresh();
+				hasInited = true;
 			},false);
 			
 			mui.ready(function($){
