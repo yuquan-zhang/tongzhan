@@ -87,6 +87,34 @@
 			.mui-segmented-control.mui-scroll-wrapper .mui-control-item {
 			    padding: 0 5px;
 			}
+			#slider {
+				top: 244px;
+			}
+			#sliders {
+				height: 200px;
+			}
+			#popup {
+				padding: 5px;
+				height: 200px;
+				position: fixed;
+				background-color: #ffffff;
+				border: 1px solid lightgrey;
+				border-radius: 5px;
+				z-index: 1000;
+				display: block;
+			}
+			.zui-suggest-button, .zui-manuscript-title, .zui-manuscript-Content {
+				position: absolute;
+				bottom: 50px;
+				text-align: center;
+				width: 100%;
+			}
+			.zui-manuscript-title {
+				bottom: 300px;
+			}
+			.zui-manuscript-Content {
+				bottom: 200px;
+			}
 		</style>
 	</head>
 
@@ -96,8 +124,12 @@
 		    <h1 class="mui-title">首页</h1>
 		</header>
 		<div class="mui-content">
-			<div id="sliders" class="mui-slider">
-			</div>
+			<div id="sliders" class="mui-slider mui-fullscreen">
+				<a href="#">
+					<img style="width: 100%;" :src="news.img"  :alt="news.title" />
+					<p class="mui-slider-title">{{news.title}}</p>
+				</a>
+			</div> 
 		    <div id="slider" class="mui-slider mui-fullscreen">
 				<div id="sliderSegmentedControl" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
 					<div class="mui-scroll">
@@ -206,6 +238,27 @@
 					</div>
 				</div>
 			</div>
+			<div v-if="has" id="popup" :style="styleObject">
+				<div class="zui-row">
+					<div class="zui-col-11">&nbsp;</div>
+					<div @tap="has = !has" class="zui-col-1" style="color: red">X</div>
+				</div>
+				<div id="manuTitle" class="zui-manuscript-title">
+					{{manuscripts.title}}
+				</div>
+				<div id="manuContent" class="zui-manuscript-Content">
+					{{manuscripts.content}}
+				</div>
+				<div class="zui-suggest-button">
+					<div class="zui-row">
+						<div class="zui-col-2">&nbsp;</div>
+						<div class="zui-col-8">
+							<a @tap="goSuggest(manuscripts)" class="btn btn-primary">立即发表建言</a>
+						</div>
+						<div class="zui-col-2">&nbsp;</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<script src="../../js/mui.min.js"></script>
 		<script src="../../js/mui.pullToRefresh.js"></script>
@@ -219,6 +272,14 @@
 			
 			var pageSize = 10;
 			var vms = [];
+			
+			var upHead = new Vue({
+                el:"#sliders",
+                data:{
+                    items:[],
+					news:{}
+                }
+            });
 			
 			var vm1 = new Vue({
 				el: "#vue1",
@@ -266,25 +327,92 @@
 			});
 			vms[4] = vm5;
 			
-			var genres = ['0','1','2','3','4'];
+			var genres = ['TZDT','PDYW','JCTZ','ZYYL','RWFQ'];
 			
 			var getNewsByGenre = function(){};
 			var openDetail = function(){};
-			
+			var openSubmit = function(){};
 			var detailView = null;
+			var submitView = null;
 			var thisView = {};
 			
-			window.addEventListener("data_transfer",function(e){
-				App.util.print(276,e.detail.data); 
-				thisView.data = e.detail.data;
-				refresh();
-			},false);
+			var popup = new Vue({
+				el: "#popup",
+				data: {
+					styleObject: {
+						height: (screen.availHeight / 5 * 3) + "px",
+						top: (screen.availHeight / 5) + "px",
+                        width: (screen.availWidth / 10 * 8) + "px",
+                        left: (screen.availWidth / 10) + "px"
+					},
+					manuscripts: {},
+					has:false
+				},
+				methods: {
+					goSuggest: function(manuscripts) {
+						this.has = false;
+						openSubmit(manuscripts);
+					}
+				}
+			});
+			
+			function changeNewestManuscriptsId(accountId,manuscriptsId) {
+				App.ajax({
+					line: 354,
+					url: "/back/sys/account/changeNewestManuscriptsId.do",
+					data:{
+						id: accountId,
+						manuscriptsId: manuscriptsId
+					},
+					success: function (data) {
+						thisView.data.webAccount.newestManuscriptsId = popup.manuscripts.id;
+						App.setData("currentUser",thisView.data);
+						plus.webview.getLaunchWebview().evalJS("refreshThisView();");
+					}
+				});
+			}
+			
+			function getManuscriptsPage(vue,pageNo,title) {
+			    App.ajax({
+			        line: 368,
+			        url: "/front/suggest/getManuscriptsPage.do",
+			        data:{
+			            pageSize:pageSize,
+			            pageNo:pageNo,
+			            title:title || '',
+			            status:'send',
+			            order:'sendTime'
+			        },
+			        success: function (data) {
+			            var items = data.data.content || [];
+						if(items.length > 0) {
+							var manuscripts = items[0];
+							if(manuscripts.id != thisView.data.webAccount.newestManuscriptsId) {
+								vue.has = true;
+								vue.manuscripts = manuscripts;
+								changeNewestManuscriptsId(thisView.data.webAccount.id, manuscripts.id);
+							}
+						}
+			        }
+			    });
+			}
 			
 			function refresh() {
+				var currentUser = thisView.data;
+				if(currentUser != null && currentUser.webAccount != null && currentUser.webAccount.authenticated == '1') {
+					mui.later(getManuscriptsPage(popup,1),1000);
+				}
 				for(var i = 0; i < 5; i++){
 					getNewsByGenre(genres[i],vms[i],pageSize,1,'');
 				}
 			}
+			
+			window.addEventListener("data_transfer",function(e){
+				thisView.data = e.detail.data;
+				refresh();
+			},false);
+			
+			
 			
 			function getActiveTab() {
 				var result = 0;
@@ -294,6 +422,29 @@
 				return result;
 			}
 			
+			function getNewest(vue,limit) {
+				var updata = {
+                        limit:limit
+                    }
+				App.ajax({
+					line: 312,
+					url: "/front/main/newest.do",
+					data:updata,
+					success: function(data) {
+						var newpage = data.data || [];
+						vue.items = newpage.map(function(item){
+						    item.img = App.config.serverUrl + item.img;
+						    item.publishTime = App.util.dateFormat(item.publishTime);
+							item.title = App.util.truncateString(item.title, 20);
+						    return item;
+						}); 
+						if(newpage.length > 0) vue.news = vue.items[0];
+					}
+				})
+            }
+
+            getNewest(upHead,1);
+
 			(function($) {
 				//阻尼系数
 				var deceleration = mui.os.ios?0.003:0.0009;
@@ -369,10 +520,27 @@
 							detailView.show("pop-in",300);
 						}
 						
+						submitView = mui.preload({
+							url:'../sug/submit.html',
+							id: App.name + '../sug/submit.html',
+							styles: {
+								popGesture: 'hide'
+							},//窗口参数
+							extras:{}//自定义扩展参数
+						})
+						
+						openSubmit = function(item) {
+						    mui.fire(submitView,"data_transfer",{
+						        data:thisView.data,
+						        manuscripts:item
+						    })
+						    submitView.show("pop-in",300);
+						}
+						
 						refresh();
 					})
 				});
-				
+
 				document.querySelector("header > .mui-icon-person").addEventListener("tap",function(){
 					plus.webview.currentWebview().parent().evalJS("openUserView()");
 				})

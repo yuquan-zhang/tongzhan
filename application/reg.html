@@ -6,6 +6,7 @@
 		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
 		<title></title>
 		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/mui.picker.min.css" rel="stylesheet" />
 		<link href="css/app.css" rel="stylesheet" />
 		<style>
 			.area {
@@ -36,11 +37,19 @@
 		<div class="mui-content">
 			<form class="mui-input-group">
 				<div class="mui-input-row">
-					<label>账号</label>
-					<input id='account' type="tel" class="mui-input-clear mui-input" placeholder="请输入手机号码">
+					<label>手机号</label>
+					<input id='phone' type="tel" class="mui-input-clear mui-input" placeholder="请输入手机号码">
+				</div>
+				<div class="mui-input-row">
+					<label>姓名</label>
+					<input id='name' type="text" class="mui-input-clear mui-input" placeholder="请输入姓名">
+				</div>
+				<div class="mui-input-row" id="clanPicker">
+					<label>党派</label>
+					<input id='clan' type="text" class="mui-input-clear mui-input" placeholder="请选择党派" readonly="readonly">
 				</div>
 				<div class="mui-content-padded">
-					<button id='getValidCode' style="padding: 6px;" class="mui-btn mui-pull-right mui-btn-primary">获取验证码</button>
+					<button id='getValidCode' type="button" style="padding: 6px;" class="mui-btn mui-pull-right mui-btn-primary">获取验证码</button>
 				</div>
 				<div class="mui-input-row">
 					<label>验证码</label>
@@ -59,72 +68,185 @@
 			<div class="mui-content-padded">
 				<button id='reg' class="mui-btn mui-btn-block mui-btn-primary">注册</button>
 			</div>
-			<div class="mui-content-padded">
-				<p>仅支持手机号码注册，请在账号栏中输入正确的手机号码</p>
-			</div>
 		</div>
 		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.min.js"></script>
 		<script src="js/app.js"></script>
 		<script>
+			
+			var thisPage = {
+				clans : null
+			}
+			
+			function setClanSelect(data) {
+				//普通示例
+				var clanPicker = new mui.PopPicker();
+				clanPicker.setData(data);
+				var clanPickerButton = document.getElementById('clanPicker');
+				var clanResult = document.getElementById('clan');
+				clanPickerButton.addEventListener('tap', function(event) {
+					clanPicker.show(function(items) {
+						clanResult.value = items[0].text;
+						clanResult.placeholder = items[0].value;
+						//返回 false 可以阻止选择框的关闭
+						//return false;
+					});
+				}, false);
+			}
+			
+			function getClans() {
+				if(thisPage.clans != null) return;
+				App.ajax({
+					line: 72,
+					url: "/front/noauth/getClans.do",
+					data:{
+						id:1
+					},
+					success: function (data) {
+						var list = data.data || [];
+						var clanData = list.map(function(item){
+							return {value:item.val, text: item.title};
+						})
+						setClanSelect(clanData);
+						thisPage.clans = clanData;
+					},
+				});
+			}
+			
+			window.addEventListener("data_transfer",function(e){
+				getClans();
+			},false);
+			
+			var timeCount = 60;
+			
 			(function($, doc) {
 				$.init();
+				$.ready(function(){
+					getClans();
+					var phoneInput = doc.getElementById("phone");
+					
+					phoneInput.addEventListener("change",function(){
+						var mobile = phoneInput.value;
+						App.ajax({
+							line: 131,
+							url: "/front/noauth/check_mobile.do",
+							data:{
+								mobile:mobile,
+							},
+							success: function (data) {
+								// mui.alert(data.data);
+							}
+						});
+					})
+					
+					var getValidCodeBtn = doc.getElementById("getValidCode");
+					getValidCodeBtn.addEventListener('tap',function () {
+						console.log("taolng");
+						if(timeCount != 60) return;
+						var phone = phoneInput.value;
+						var name = doc.getElementById("name").value;
+						var clan = doc.getElementById("clan").value;
+						if(!App.util.validPhone(phone)) {
+							mui.alert("请输入正确的手机号码");
+							return;
+						}
+						if(!name) {
+							mui.alert("请输入姓名");
+							return;
+						}
+						if(!clan) {
+							mui.alert("请选择党派");
+							return;
+						}
+
+						App.ajax({
+							line: 145,
+							url: "/front/noauth/send_vaild_code.do",
+							data:{
+								phone: phone,
+								name: name,
+								clan: clan
+							},
+							success: function (data) {
+								mui.alert(data.data);
+								var interval = setInterval(function() {
+									getValidCodeBtn.innerHmtl = timeCount+ '秒后可重试';
+									timeCount--
+								},1000)
+								
+								setTimeout(function(){
+									clearInterval(interval);
+									timeCount = 60;
+									getValidCodeBtn.innerHmtl = '获取验证码';
+								},60000);
+							}
+						});
+					})
+				})
 				$.plusReady(function() {
 					var regButton = doc.getElementById('reg');
-					var accountBox = doc.getElementById('account');
+					var phoneBox = doc.getElementById('phone');
+					var nameBox = doc.getElementById('name');
+					var clanBox = doc.getElementById('clan');
 					var passwordBox = doc.getElementById('password');
 					var confirmBox = doc.getElementById('password_confirm');
 					var validCode = doc.getElementById('validCode');
 					
 					regButton.addEventListener("tap",function(e) {
-						if(!App.util.validPhone(accountBox.value)) {
+						if(!App.util.validPhone(phoneBox.value)) {
 							$.alert("手机号码格式错误");
 							return;
 						}
-						if(App.util.isEmpty(accountBox.value, '账号不能为空')) return;
+						if(App.util.isEmpty(phoneBox.value, '账号不能为空')) return;
+						if(App.util.isEmpty(nameBox.value, '姓名不能为空')) return;
+						if(App.util.isEmpty(clanBox.placeholder, '党派不能为空')) return;
 						if(App.util.isEmpty(validCode.value, '验证码不能为空')) return;
 						if(App.util.isEmpty(passwordBox.value, '密码不能为空')) return;
-						var regInfo = {
-							phone:accountBox.value,
-							validCode:validCode.value,
-							password:passwordBox.value
-						}
-						var passwordConfirm = confirmBox.value;
-						if (passwordConfirm != regInfo.password) {
-							$.toast('密码两次输入不一致');
-							return;
-						}
 						
-						var url = App.config.serverUrl + "/front/noauth/register.do";
-						App.util.print(url,regInfo); 	      		
-			      		var wait = plus.nativeUI.showWaiting("处理中...");
-			      		mui.ajax(url,{
-			      			async:true,//是否异步
-		      				crossDomain:true,//强制使用5+跨域
-		      				data:regInfo,
-							dataType:'json',//服务器返回json格式数据
-							type:'post',//HTTP请求类型
-							timeout:10000,//超时时间设置为10秒；
-							headers:{'Content-Type':'application/x-www-form-urlencoded'},	              
-							success:function(data){
-								wait.close();
-								//服务器返回响应，根据响应结果，分析是否登录成功；
-								console.log(JSON.stringify(data));
-								if(data.success) {
-									$.alert(data.data,'提示','好的',function(e){
-										$.back();
-									})
-								}else{
-									$.toast(data.data);
-								}
+						App.ajax({
+							line: 207,
+							url: "/front/noauth/check_vaild_code.do",
+							data:{
+								code:validCode.value,
 							},
-							error:function(xhr,type,errorThrown){
-								wait.close();
-								//异常处理；
-								console.log(type);
-								console.log(errorThrown);
-								$.toast(App.getErrorText(type));
+							success: function (data) {
+								var regInfo = {
+									phone:phoneBox.value,
+									name: nameBox.value,
+									contact: phoneBox.value,
+									clan: clanBox.placeholder,
+									validCode:validCode.value,
+									password:passwordBox.value
+								}
+								var passwordConfirm = confirmBox.value;
+								if (passwordConfirm != regInfo.password) {
+									mui.alert('密码两次输入不一致');
+									return;
+								}
+								 if(passwordConfirm.trim().length < 6) {
+									mui.alert("密码长度不能小于6位");
+									return;
+								}
+								if(passwordConfirm.trim().search(/[a-z]/i) < 0) {
+									mui.alert("密码必须包含字母");
+									return;
+								}
+								if(passwordConfirm.trim().search(/\d/) < 0) {
+									mui.alert("密码必须包含数字");
+									return;
+								}
+								App.ajax({
+									line: 207,
+									url: "/front/noauth/register.do",
+									data:regInfo,
+									success:function(data){
+										$.alert(data.data,'提示','好的',function(e){
+											$.back();
+										})
+									},
+								})
 							}
-			      		})
+						});
 					})
 				});
 			}(mui, document));

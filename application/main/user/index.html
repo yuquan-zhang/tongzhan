@@ -23,6 +23,9 @@
 		<header class="mui-bar mui-bar-nav">
 		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
 		    <h1 class="mui-title">我</h1>
+			<div id="head">
+				<button @tap="goSign()" class="mui-btn mui-btn-blue mui-pull-right">{{isSigned ? "今日已签到" : "签到"}}</button>
+			</div>
 		</header>
 		<div class="mui-content">
 		    <div class="mui-scroll-wrapper zui-scroll-wrapper"
@@ -31,7 +34,7 @@
 			            <ul class="mui-table-view">
 							<li class="mui-table-view-cell mui-media">
 								<a href="javascript:;">
-									<img class="mui-media-object mui-pull-left" src="../../img/user-background.jpg">
+									<img class="mui-media-object mui-pull-left" :src="account.headImg || '../../img/user-background.jpg'">
 									<div class="mui-media-body">
 										你好
 										<p class='mui-ellipsis'>{{account.userName}}</p>
@@ -39,14 +42,14 @@
 								</a>
 							</li>
 						</ul>
-						<div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+						<!-- <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
 					        <li id="identity" class="mui-table-view-cell">
 					            <a class="mui-navigate-right">
 					                <b><span class="mui-icon mui-icon-camera"></span>身份认证</b>
 					                <span v-if="member.idNo" class="mui-pull-right">已认证</span>
 					            </a>
 					        </li>
-					    </div>
+					    </div> -->
 					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
 					        <li id="modify" class="mui-table-view-cell">
 					            <a class="mui-navigate-right">
@@ -54,7 +57,7 @@
 					            </a>
 					        </li>
 					    </div>
-					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
+					   <!-- <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
 					        <li id="phone" class="mui-table-view-cell">
 					            <a class="mui-navigate-right">
 					                <b><span class="mui-icon mui-icon-phone"></span>绑定手机</b>
@@ -69,7 +72,7 @@
 					                <span v-if="member.email" class="mui-pull-right">已绑定</span>
 					            </a>
 					        </li>
-					    </div>
+					    </div> -->
 					    <div class="mui-col-sm-12 mui-col-xs-12" style="background-color: white;border-bottom: 1px solid whitesmoke;">
 					        <li id="feedback" class="mui-table-view-cell">
 					            <a class="mui-navigate-right">
@@ -106,6 +109,19 @@
 					deceleration:deceleration
 				});
 				
+				var vmHead = new Vue({
+					el: "#head",
+					data: {
+						isSigned: false 
+					},
+					methods:{
+						goSign: function() {
+							if(this.isSigned) return;
+							sign();
+						}
+					}
+				})
+				
 				var vm = new Vue({
 					el: "#vue1",
 					data: {
@@ -121,22 +137,54 @@
 				var emailView = null;
 				var feedbackView = null;
 				
+				function getIsSign() {
+					App.ajax({
+						line: 126,
+						url: "/front/noauth/isSigned.do",
+						data:{
+							memberId:thisView.data.id || ''
+						},
+						success: function (data) {
+							console.log(data.data);
+							vmHead.isSigned = data.data;
+						}
+					});
+				}
+				
+				function sign() {
+					App.ajax({
+						line: 126,
+						url: "/front/user/sign.do",
+						data:{
+							memberId:thisView.data.id || ''
+						},
+						success: function (data) {
+							vmHead.isSigned = true;
+							thisView.data.score = thisView.data.score + 5;
+							App.setData("currentUser",thisView.data);
+							plus.webview.getLaunchWebview().evalJS("refreshThisView();");
+							mui.alert(data.data);
+						}
+					});
+				}
+				
 				window.addEventListener("data_transfer",function(e){
-					console.log(JSON.stringify(e.detail.data));
 					thisView.data = e.detail.data;
 					vm.member = thisView.data || {};
 					vm.account = vm.member.webAccount || {};
+					getIsSign();
+					mui.later(getIsSign(),1000);
 				},false);
 				
 				$.plusReady(function(){
 					
-					identityView = mui.preload({
-						url:'identity.html',
-						id: App.name + 'identity.html',
-						styles:{
-							popGesture:'hide'
-						},//窗口参数
-					});
+// 					identityView = mui.preload({
+// 						url:'identity.html',
+// 						id: App.name + 'identity.html',
+// 						styles:{
+// 							popGesture:'hide'
+// 						},//窗口参数
+// 					});
 					
 					modifyView = mui.preload({
 						url:'modify.html',
@@ -145,20 +193,20 @@
 							popGesture:'hide'
 						},//窗口参数
 					});
-					phoneView = mui.preload({
-						url:'phone.html',
-						id: App.name + 'phone.html',
-						styles:{
-							popGesture:'hide'
-						},//窗口参数
-					});
-					emailView = mui.preload({
-						url:'email.html',
-						id: App.name + 'email.html',
-						styles:{
-							popGesture:'hide'
-						},//窗口参数
-					});
+// 					phoneView = mui.preload({
+// 						url:'phone.html',
+// 						id: App.name + 'phone.html',
+// 						styles:{
+// 							popGesture:'hide'
+// 						},//窗口参数
+// 					});
+// 					emailView = mui.preload({
+// 						url:'email.html',
+// 						id: App.name + 'email.html',
+// 						styles:{
+// 							popGesture:'hide'
+// 						},//窗口参数
+// 					});
 					feedbackView = mui.preload({
 						url:'feedback.html',
 						id: App.name + 'feedback.html',
@@ -174,23 +222,23 @@
 						preview.show("pop-in",300);
 					}
 					
-					var identityBtn = doc.getElementById('identity');
+					// var identityBtn = doc.getElementById('identity');
 					var modifyBtn = doc.getElementById('modify');
-					var phoneBtn = doc.getElementById('phone');
-					var emailBtn = doc.getElementById('email');
+					// var phoneBtn = doc.getElementById('phone');
+					// var emailBtn = doc.getElementById('email');
 					var feedbackBtn = doc.getElementById('feedback');
-					identityBtn.addEventListener('tap', function(event) {
-						openPreview(identityView);
-					}, false);
+// 					identityBtn.addEventListener('tap', function(event) {
+// 						openPreview(identityView);
+// 					}, false);
 					modifyBtn.addEventListener('tap', function(event) {
 						openPreview(modifyView);
 					}, false);
-					phoneBtn.addEventListener('tap', function(event) {
-						openPreview(phoneView);
-					}, false);
-					emailBtn.addEventListener('tap', function(event) {
-						openPreview(emailView);
-					}, false);
+// 					phoneBtn.addEventListener('tap', function(event) {
+// 						openPreview(phoneView);
+// 					}, false);
+// 					emailBtn.addEventListener('tap', function(event) {
+// 						openPreview(emailView);
+// 					}, false);
 					feedbackBtn.addEventListener('tap', function(event) {
 						openPreview(feedbackView);
 					}, false);
@@ -207,7 +255,7 @@
 				var oldBack = $.back;
 				$.back = function() {
 					mui.fire(plus.webview.currentWebview().opener(),"data_transfer",{
-						data:{}
+						data:thisView.data
 					})
 					oldBack();
 				}

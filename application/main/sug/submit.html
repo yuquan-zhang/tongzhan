@@ -22,23 +22,17 @@
 		        <div class="mui-scroll">
 		            <!--这里放置真实显示的DOM内容-->
 		            <form id="vue1" class="mui-input-group">
+						<input type="hidden" v-model="suggest.id" name="id" id="id">
+						<input type="hidden" v-model="manuscripts.id" name="manuscriptsId" id="manuscriptsId">
 						<div class="mui-input-row">
-							<label>姓名</label>
-							<input id='username' type="text" class="mui-input-clear mui-input" placeholder="" disabled="disabled">
-						</div>
-						<div class="mui-input-row" id="typePick">
-							<label>界别</label>
-							<input id='sugtype' type="text" class="mui-input-clear mui-input" placeholder="点击选择" readonly="readonly">
-						</div>
-						
+							<label>约稿主题</label>
+							<input id='subject' v-model="manuscripts.title" type="text" class="mui-input" placeholder="" readonly="readonly">
+						</div>						
 						<div class="mui-input-row">
 							<label>标题</label>
-							<input id='title' type="text" class="mui-input-clear mui-input" placeholder="请输入标题">
+							<input id='title' v-model="suggest.title" type="text" class="mui-input-clear mui-input" placeholder="请输入标题">
 						</div>
-						<div class="mui-input-row" style="height: auto">
-							<label>内容</label>
-							<textarea id='content' rows="5" cols="50" class="mui-input-clear mui-input" placeholder="请输入您的建言献策"></textarea>
-						</div>
+						<textarea id='content' rows="15" cols="50" class="mui-input-clear mui-input" placeholder="内容:请输入您的建言献策">{{suggest.content}}</textarea>
 						
 					</form>
 					<div class="mui-content-padded">
@@ -53,6 +47,7 @@
 		<script src="../../js/vue.min.js"></script>
 		<script src="../../js/app.js"></script>
 		<script type="text/javascript">
+			
 			(function($,doc){
 				$.init();
 				//阻尼系数
@@ -63,61 +58,36 @@
 					deceleration:deceleration
 				});
 				
+				var vm = new Vue({
+					el: "#vue1", 
+					data: {
+						suggest: {},
+						task: {},
+						manuscripts: {}
+					}
+				})
+				
 				var thisView = {};
 				
 				window.addEventListener("data_transfer",function(e){
-					console.log(JSON.stringify(e.detail.data));
 					thisView.data = e.detail.data;
-					thisView.suggest = e.detail.suggest || {};
-					
-					document.getElementById("username").value = thisView.data.name || '';
-					document.getElementById("sugtype").value = thisView.suggest.typeText || '';
-					document.getElementById("sugtype").placeholder = thisView.suggest.type || '';
-					document.getElementById("title").value = thisView.suggest.title || '';
-					document.getElementById("content").value = thisView.suggest.content || '';
+					vm.suggest = e.detail.suggest || {};
+					vm.manuscripts = e.detail.manuscripts || {};
 				},false);
 				
 				$.plusReady(function(){
-					var sugTypes = [
-						{
-							value:"ALL",
-							text:"所有界别",
-						},
-						{
-							value:"MM",
-							text:"民盟",
-						},
-						{
-							value:"MG",
-							text:"民革",
-						}
-					];
-					var sugTypePicker = new mui.PopPicker();
-					sugTypePicker.setData(sugTypes);
-					var typeBtn = doc.getElementById("typePick");
-					var typeResult = doc.getElementById("sugtype");
-					typeBtn.addEventListener("tap", function(event) {
-						sugTypePicker.show(function(items) {
-							typeResult.value = items[0].text;
-							typeResult.placeholder = items[0].value;
-							//返回 false 可以阻止选择框的关闭
-							//return false;
-						});
-					}, false);
 					
 					function uploadData(url) {
-						var sugtype = doc.getElementById("sugtype");
 			      		var title = doc.getElementById("title").value;
 			      		var content = doc.getElementById("content").value;
-			      		if(App.util.isEmpty(sugtype.value,"请选择界别")) return;
 			      		if(App.util.isEmpty(title,"请输入标题")) return;
 			      		if(App.util.isEmpty(content,"请输入内容")) return;
 			      		var updata = {
 			      			createUserId:thisView.data.webAccount.id,
-			      			id:thisView.suggest.id || '',
-			      			type:sugtype.placeholder,
-			      			title,
-			      			content
+			      			id:vm.suggest.id || '',
+							manuscriptsId: vm.manuscripts.id || '',
+			      			title:title,
+			      			content: content
 			      		}
 						App.ajax({
 							line: 123,
@@ -131,10 +101,10 @@
 					}
 					
 					doc.getElementById("submitBtn").addEventListener("tap",function(){
-						uploadData("/front/suggest/sugSubmit.do")
+						uploadData("/front/suggest/submit.do")
 					})
 					doc.getElementById("saveBtn").addEventListener("tap",function(){
-						uploadData("/front/suggest/sugSave.do")
+						uploadData("/front/suggest/save.do")
 					})
 				})
 			})(mui,document);
@@ -142,7 +112,7 @@
 			var oldBack = mui.back;
 			mui.back = function() {
 				var opener = plus.webview.currentWebview().opener();
-				opener.evalJS("pulldownRefresh()");
+				opener.evalJS("refresh()");
 				oldBack();
 			}
 		</script>

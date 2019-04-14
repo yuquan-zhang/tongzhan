@@ -105,6 +105,7 @@
 	      		var loginInfo = App.getData("loginInfo") || {};
 				document.getElementById("account").value = loginInfo.loginName || "";
 				document.getElementById("password").value = loginInfo.password || "";
+				
 	      		function toHomeMenu(data) {
 					App.setData("currentUser",data);
 					mui.fire(plus.webview.getLaunchWebview(),"data_transfer",{
@@ -123,6 +124,7 @@
 		      			password:password
 		      		}
 					App.setData("loginInfo",updata);
+					App.setData("isTokenTimeout",false);
 					App.ajax({
 						line: 134,
 						url: "/front/noauth/login.do",
@@ -132,41 +134,44 @@
 						}
 					})
 		      	});
+				
+				var viewStyles = {
+					"render": "always",
+					"popGesture": "hide",
+					"bounce": "vertical",
+					"bounceBackground": "#efeff4"
+				}
+				
+				registerView = mui.preload({
+					url: 'reg.html',
+					id: App.name + 'reg.html',
+					styles: viewStyles,
+				})
+				
+				forgetView = mui.preload({
+					url: 'forget_password.html',
+					id: App.name + 'forget_password.html',
+					styles: viewStyles,
+				})
+				
+				function openRegisterView() {
+					mui.fire(registerView,"data_transfer",{})
+					registerView.show("slide-in-top",300);
+				}
+				
+				function openForgetView() {
+					mui.fire(forgetView,"data_transfer",{})
+					forgetView.show("slide-in-top",300);
+				}
 	      		
 	      		(function($,doc){
 	      			var regButton = doc.getElementById('reg');
 					var forgetButton = doc.getElementById('forgetPassword');
 	      			regButton.addEventListener('tap', function(event) {
-						$.openWindow({
-							url: 'reg.html',
-							id: App.name + 'reg',
-							preload: true,
-							show: {
-								aniShow: 'pop-in'
-							},
-							styles: {
-								popGesture: 'hide'
-							},
-							waiting: {
-								autoShow: false
-							}
-						});
+						openRegisterView();
 					}, false);
 					forgetButton.addEventListener('tap', function(event) {
-						$.openWindow({
-							url: 'forget_password.html',
-							id: App.name + 'forget_password',
-							preload: true,
-							show: {
-								aniShow: 'pop-in'
-							},
-							styles: {
-								popGesture: 'hide'
-							},
-							waiting: {
-								autoShow: false
-							}
-						});
+						openForgetView();
 					}, false);
 	      		}(mui,document));
 	      		 

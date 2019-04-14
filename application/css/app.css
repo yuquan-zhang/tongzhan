@@ -10,12 +10,68 @@
 
 
 
-
-
 /*mui css rewrite*/
+* {
+	/* open select, copy, and paste */
+-webkit-user-select: auto;
+}
 .mui-bar-nav {
 	background-color: #007AFF;
 }
 .mui-bar-nav > .mui-icon {
 	color: white;
+}
+
+.zui-row {
+	width: 100%;
+}
+.zui-row::after {
+	content: '';
+    	clear: both;
+    	display: table;
+}
+.zui-row>[class*=zui-col-] {
+	float: left;
+	text-align: center;
+}
+.zui-col-1 {
+	width: 8.3333333%;
+}
+.zui-col-2 {
+	width: 16.6666667%;
+}
+.zui-col-3 {
+	width: 25%;
+}
+.zui-col-4 {
+	width: 33.3333333%;
+}
+.zui-col-5 {
+	width: 41.6666667%;
+}
+.zui-col-6 {
+	width: 50%;
+}
+.zui-col-7 {
+	width: 58.3333333%;
+}
+.zui-col-8 {
+	width: 66.6666667%;
+}
+.zui-col-9 {
+	width: 75%;
+}
+.zui-col-10 {
+	width: 83.3333333%;
+}
+.zui-col-11 {
+	width: 91.6666667%;
+}
+.zui-col-12 {
+	width: 100%;
+}
+.zui-clearFix::after {
+    	content: '';
+    	clear: both;
+    	display: table;
 }

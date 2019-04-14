@@ -81,6 +81,7 @@
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
 				vm.item = e.detail.item;
+                vm.item.detail = vm.item.detail.replace(/(img[^\<|\>]* src=\")(\/userfile\/ueditor\/upload\/image\/[\w|\d|\/]*\.\w{1,5})(\")/g,"$1" + App.config.serverUrl + "$2$3");
 				var applyBtn = document.getElementById("apply");
 				if(vm.item.isLearned) {
 					applyBtn.innerText = '已完成学习';

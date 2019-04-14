@@ -47,6 +47,10 @@
 				data: null
 			};
 			
+			function refreshThisView() {
+				thisView.data = App.getData("currentUser");
+			}
+			
 			function hasLogined() {
 				return thisView.data != null;
 			}
@@ -116,7 +120,7 @@
 	        })
 	         //当前激活选项
 			activeTab = subpages[0];
-//			var title = document.getElementById("title");
+			
 			 //选项卡点击事件
 			mui('.mui-bar-tab').on('tap', 'a', function(e) {
 				var targetTab = this.getAttribute('href');

@@ -9,116 +9,483 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<link href="../../css/mui.min.css" rel="stylesheet" />
 		<link href="../../css/app.css" rel="stylesheet" />
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.mui-bar~.mui-content .mui-fullscreen {
+				top: 44px;
+				height: auto;
+			}
+			.mui-pull-top-tips {
+				position: absolute;
+				top: -20px;
+				left: 50%;
+				margin-left: -25px;
+				width: 40px;
+				height: 40px;
+				border-radius: 100%;
+				z-index: 1;
+			}
+			.mui-bar~.mui-pull-top-tips {
+				top: 24px;
+			}
+			.mui-pull-top-wrapper {
+				width: 42px;
+				height: 42px;
+				display: block;
+				text-align: center;
+				background-color: #efeff4;
+				border: 1px solid #ddd;
+				border-radius: 25px;
+				background-clip: padding-box;
+				box-shadow: 0 4px 10px #bbb;
+				overflow: hidden;
+			}
+			.mui-pull-top-tips.mui-transitioning {
+				-webkit-transition-duration: 200ms;
+				transition-duration: 200ms;
+			}
+			.mui-pull-top-tips .mui-pull-loading {
+				/*-webkit-backface-visibility: hidden;
+				-webkit-transition-duration: 400ms;
+				transition-duration: 400ms;*/
+				margin: 0;
+			}
+			.mui-pull-top-wrapper .mui-icon,
+			.mui-pull-top-wrapper .mui-spinner {
+				margin-top: 7px;
+			}
+			.mui-pull-top-wrapper .mui-icon.mui-reverse {
+				/*-webkit-transform: rotate(180deg) translateZ(0);*/
+			}
+			.mui-pull-bottom-tips {
+				text-align: center;
+				background-color: #efeff4;
+				font-size: 15px;
+				line-height: 40px;
+				color: #777;
+			}
+			.mui-pull-top-canvas {
+				overflow: hidden;
+				background-color: #fafafa;
+				border-radius: 40px;
+				box-shadow: 0 4px 10px #bbb;
+				width: 40px;
+				height: 40px;
+				margin: 0 auto;
+			}
+			.mui-pull-top-canvas canvas {
+				width: 40px;
+			}
+			.mui-slider-indicator.mui-segmented-control {
+				background-color: #efeff4;
+			}
+			.mui-segmented-control.mui-scroll-wrapper .mui-control-item {
+			    padding: 0 15px;
+			}
+			.icons > .mui-icon {
+				color: dodgerblue;
+			}
+			.zui-my-scripts {
+				border: 1px solid grey;
+				padding: 10px;
+			}
+		</style>
 	</head>
 
 	<body>
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-icon mui-icon-person mui-pull-left"></a>
 		    <h1 class="mui-title">建言献策</h1>
-		    <a id="edit" class="mui-icon mui-icon-compose mui-pull-right"></a>
-		    <span class="mui-pull-right">&nbsp;&nbsp;</span>
-		    <a id="draft" class="mui-icon mui-icon-list mui-pull-right"></a>
 		</header>
 		<div class="mui-content">
-			<div class="mui-input-row mui-search">
-			    <input id="searchInput" onchange="onSearchChange(this)" type="search" class="mui-input" placeholder="">
-			</div>
-			<div id="pullrefresh" class="mui-scroll-wrapper" style="top: 80px;">
-				<div class="mui-scroll">
-					<!--数据列表-->
-					<ul id="vue1" class="mui-table-view">
-						<li v-for="item in items" class="mui-table-view-cell">
-							<a @tap="javascript:openDetail(item)" class="mui-navigate-right">
-								<p>
-									<span>界别：{{item.type}}</span>
-									<span class="mui-pull-right">录用状态：{{item.status}}</span>
-					            </p>
-					            <h4>{{item.title}}</h4>
-					            <p class="zui-sug-content">
-					                {{item.content}}
-					            </p>
-							</a>
-						</li>
-					</ul>
+			<div id="slider" class="mui-slider mui-fullscreen">
+				<div id="sliderSegmentedControl" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+					<div class="mui-scroll">
+						<a class="mui-control-item mui-active" href="#item1mobile">
+							精彩建言集锦
+						</a>
+						<a class="mui-control-item" href="#item2mobile">
+							我收到的约稿
+						</a>
+						<a class="mui-control-item" href="#item3mobile">
+							我的建言列表
+						</a>
+					</div>
 				</div>
-			</div>
-				
+				<div class="mui-slider-group">
+					<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+						<div id="scroll1" class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<div class="mui-input-row mui-search">
+								    <input id="searchInput" onchange="onSearchChange(this)" type="search" class="mui-input" placeholder="按标题搜索">
+								</div>
+								<ul id="vue1" class="mui-table-view">
+									<div v-for="item in items" >
+										<div class="mui-card">
+											<div class="mui-card-header">
+                                                <b>约稿主题：{{item.manuscripts.title}}</b>
+                                            </div>
+											<div class="mui-card-content">
+												<div class="mui-card-content-inner">
+                                                    <b>标题：{{item.title}}</b><br/><br/>
+                                                    <p><b>内容：</b>{{App.util.truncateString(item.content,100)}}</p>
+													<br/>
+													<p style="color: black;"><b>建言人：</b>{{item.createUser.userName}}</p>
+												</div>
+											</div>
+											<div class="mui-card-footer">
+                                                <a style="color: lightcoral;" class="mui-card-link"><b>状态：</b>{{item.status}}</a>
+                                                <a @tap="openDetail(item)" class="mui-card-link">查看详情</a>
+											</div>
+										</div>
+									</div>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div id="item2mobile" class="mui-slider-item mui-control-content">
+						<div class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<div class="mui-input-row mui-search">
+								    <input onchange="onSearchChange2(this)" type="search" class="mui-input" placeholder="按主题搜索">
+								</div>
+								<ul id="vue2" class="mui-table-view">
+									<div v-for="item in items" >
+										<div class="mui-card">
+											<div class="mui-card-header">
+										        <b>主题：{{item.title}}</b>
+										    </div>
+											<div class="mui-card-content">
+												<div class="mui-card-content-inner">
+										            <p><b>简介：</b>{{item.content}}</p>
+												</div>
+											</div>
+											<div class="mui-card-footer">
+										        <a style="color: lightcoral;" class="mui-card-link"><b>约稿截止时间：</b>{{item.endTime}}</a>
+										        <a @tap="openSubmit(item)" class="mui-card-link">写建言</a>
+											</div>
+										</div>
+									</div>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div id="item3mobile" class="mui-slider-item mui-control-content">
+						<div class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<ul id="vue3" class="mui-table-view">
+									<div v-if="message.id != null" class="mui-col-sm-2 mui-col-xs-12" style="color: dodgerblue;" @tap="openMessage()">
+										<li class="mui-table-view-cell">
+											<h6 @tap="openMessage()"><a>{{message.content}}&nbsp;<span>{{App.util.dateFormat(message.createTime)}}</span> ></a></h6>
+										</li>
+									</div>
+									<div class="mui-card">
+										<div class="mui-card-header" @tap="openMySuggestList()">
+											<a  class="text-center">我已提交的建言 </a><span class="mui-pull-right"> > </span>
+										</div>
+										<div class="mui-card-content">
+											<div class="mui-card-content-inner">
+												<div class="zui-row" style="color: red;">
+													<div class="zui-col-2">{{countMap.all || 0 }}</div>
+													<div class="zui-col-2">{{countMap.wait || 0 }}</div>
+													<div class="zui-col-2">{{countMap.refuse || 0 }}</div>
+													<div class="zui-col-2">{{countMap.agree || 0 }}</div>
+													<div class="zui-col-2">{{countMap.preserve || 0 }}</div>
+													<div class="zui-col-2">{{countMap.timeout || 0 }}</div>
+												</div>
+												<div class="zui-row">
+													<div class="zui-col-2">全部</div>
+													<div class="zui-col-2">待审批</div>
+													<div class="zui-col-2">待修改</div>
+													<div class="zui-col-2">已采用</div>
+													<div class="zui-col-2">已备用</div>
+													<div class="zui-col-2">已留存</div>
+												</div>
+											</div>
+										</div>
+										<div class="mui-card-footer">
+											
+										</div>
+										
+									</div>
+									<div class="mui-col-sm-2 mui-col-xs-12" style="color: dodgerblue;" @tap="openDraft()">
+										<li class="mui-table-view-cell">
+											<a class="mui-navigate-right">
+												<b><span class="mui-icon"></span>我的草稿箱</b>
+											</a>
+										</li>
+									</div>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>				
 		</div>
 		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/mui.pullToRefresh.js"></script>
+		<script src="../../js/mui.pullToRefresh.material.js"></script>
 		<script src="../../js/vue.min.js"></script>
 		<script src="../../js/app.js"></script>
 		<script type="text/javascript">
 			mui.init({
 				swipeBack: false,
-				pullRefresh: {
-					container: '#pullrefresh',
-					down: {
-						callback: pulldownRefresh
-					},
-					up: {
-						contentrefresh: '正在加载...',
-						callback: pullupRefresh
-					}
-				}
 			});
 			
-			var vm = new Vue({
-				el: "#vue1",
-				data: {
-					items: []
-				}
-			});
-			
-			var page1 = {
-				size: 10,
-				numb: 1,
-				isLast: false
-			}
-			
+			var thisPage = {
+				pageSize : 10,
+			};
+
 			var thisView = {};
 			var sDetailView = null;
 			var draftView = null;
 			var submitView = null;
+			var mySuggestListView = null;
+			var messageView = null;
 			
 			var openDetail = function(){};
-			var getSuggests = function(){};
+            var openDraft = function(){};
+            var openSubmit = function(){};
+            var openMySuggestList = function(){};
+            var openMessage = function(){};
+
+			var vms = [];
+			var suggests = new Vue({
+				el:"#vue1",
+				data:{
+					items:[],
+					pageNo:1,
+					isLast: false
+				},
+				methods: {
+					more: function() {
+						if(!this.hasMore) getSuggests(this,++this.pageNo,"BY");
+					},
+					viewDetail: function(item) {
+						mui.alert(item.title);
+					}
+				}
+			});
+			vms.push(suggests);
+			
+			var manuscripts = new Vue({
+				el:"#vue2",
+				data:{
+					items:[],
+					pageNo:1,
+					isLast: false
+				},
+				methods : {
+					more: function() {
+						if(!this.isLast) getManuscriptsPage(this,++this.pageNo);
+					}
+				}
+			});
+			vms.push(manuscripts);
+			
+			var countVue = new Vue({
+				el:"#vue3",
+				data:{
+					countMap: {},
+					message: {}
+				}
+			});
+			vms.push(countVue);
+			
+			function initVue(vue) {
+				vue.items = [];
+				vue.pageNo = 1;
+				vue.isLast = false;
+			}
+			
+			function getDictionary(dictionaryCode, obj, key) {
+				App.ajax({
+					line: 154,
+					url: "/front/suggest/getDictionary.do",
+					data:{
+						dictionaryCode : dictionaryCode
+					},
+					success: function(data) {
+						obj[key] = data.data || [];
+					}
+				})
+			}
+
+			function getSuggests(vue,pageNo,status,title) {
+				App.ajax({
+					line: 167,
+					url: "/front/suggest/status.do",
+					data:{
+						pageSize:thisPage.pageSize,
+						pageNo:pageNo,
+						status:status || '',
+						title: title || ''
+					},
+					success: function(data) {
+						var others = data.data.content || [];
+						var news = others.map(function (value) {
+							var result = value;
+							result.status = advise.getStatusName(value.status);
+							return result;
+						});
+						if(pageNo == 1) vue.items = news || [];
+						else vue.items.concat(news);
+						vue.isLast = others.length < thisPage.pageSize;
+					}
+				})
+			}
+			
+			function onSearchChange(element) {
+				getSuggests(suggests,1,'CY', element.value);
+			}
+
+			function countSuggests(vue) {
+				App.ajax({
+					line: 192,
+					url: "/front/suggest/countSuggests.do",
+					data:{
+						currentUserId:thisView.data.webAccount.id || 0
+					},
+					success: function(data) {
+						vue.countMap = data.data || {};
+					}
+				})
+			}
+
+			function getMessages(vue,pageNo) {
+				App.ajax({
+					line: 205,
+					url: "/front/suggest/getMessages.do",
+					data:{
+						receiveUserId:thisView.data.webAccount.id || 0,
+						pageSize:thisPage.pageSize,
+						pageNo:pageNo,
+						status:'未读'
+					},
+					success: function(data) {
+						var others = data.data.content || [];
+						if(others.length > 0) {
+							vue.message = others[0] || {};
+						}
+					}
+				})
+			}
+			
+			function getManuscriptsPage(vue,pageNo,title) {
+				App.ajax({
+					line: 294,
+					url: "/front/suggest/getManuscriptsPage.do",
+					data:{
+						pageSize:thisPage.pageSize,
+						pageNo:pageNo,
+						title:title || '',
+						status:'send',
+						order:'sendTime'
+					},
+					success: function(data) {
+						var others = data.data.content || [];
+						var news = others.map(function (value) {
+							var result = value;
+							result.endTime = App.util.dateFormat2(value.endTime);
+							return result;
+						});
+						if(pageNo == 1) vue.items = news || [];
+						else vue.items.concat(news);
+						vue.isLast = others.length < thisPage.pageSize;
+					}
+				})
+			}
+			
+			function onSearchChange2(element) {
+				getManuscriptsPage(manuscripts,1, element.value);
+			}
+
+			(function (advise) {
+				advise.getNameInList = function (list, value) {
+					for(var i = 0; i < list.length; ++i) {
+						if(value == list[i].val) {
+							return list[i].title;
+						}
+					}
+					return '';
+				}
+				var obj = {};
+				getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
+				advise.getStatusName = function(value) {
+					return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
+				}
+			})(window.advise = {});
+
+            thisPage.init = function() {
+                initVue(suggests);
+                initVue(manuscripts);
+                countVue.countMap = {};
+                countVue.message = {};
+                getSuggests(suggests,1,"CY");
+                getManuscriptsPage(manuscripts,1);
+                countSuggests(countVue);
+                getMessages(countVue,1);
+            }
+			
+			function refresh() {
+				thisPage.init();
+			}
 			
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
-				page1.numb = 1;
-				var searchInput = document.getElementById("searchInput");
-				getSuggests(vm,page1.size,page1.numb++,searchInput.value,thisView.data.webAccount.id);
+				thisPage.init();
 			},false);
 			
+			mui.ready(function($){
+				//阻尼系数
+				var deceleration = mui.os.ios?0.003:0.0009;
+				$('.mui-scroll-wrapper').scroll({
+					bounce: false,
+					indicators: true, //是否显示滚动条
+					deceleration:deceleration
+				});
+			})
+
 			mui.plusReady(function() {
+				
+				mui.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
+					
+					mui(pullRefreshEl).pullToRefresh({
+						down: {
+							callback: function() {
+								var self = this;
+								setTimeout(function() {
+									if(index == 0) getSuggests(suggests,1,"CY");
+									if(index == 1) getManuscriptsPage(manuscripts,1);
+									if(index == 2) {
+										countSuggests(countVue);
+										getMessages(countVue,1);
+									}
+									self.endPullDownToRefresh();
+								}, 1000);
+							}
+						},
+						up: {
+							callback: function() {
+								var self = this;
+								setTimeout(function() {
+									if(index != 2){
+										vms[index].more();
+										self.endPullUpToRefresh(vms[index].isLast);
+									} else {
+										self.endPullUpToRefresh(true);
+									}
+								}, 1000);
+							}
+						}
+					});
+				});
+				
 				var self = plus.webview.currentWebview();
 				
-				getSuggests = function(vue,pageSize,pageNo,title,createdUserId) {
-					var updata = {
-		      			createUserId:createdUserId || 0,
-	                     pageSize:pageSize,
-	                     pageNo:pageNo,
-	                     title:title || '',
-	                     notStatus:'CG'
-		      		}
-					App.ajax({
-						line: 105,
-						url: "/front/suggest/type.do",
-						data:updata,
-						success: function(data) {
-							page1.isLast = data.data.last || false;
-							if(pageNo == 1) vue.items = data.data.content || [];
-							else vue.items.concat(data.data.content || []);
-							
-							vue.items = vue.items.map(function(item){
-								item.type = item.type == "ALL" ? "所有界别" : item.type == "MM"? "民盟" : "民革";
-								item.status = item.status == 'CG' ? '草稿' : item.status == 'YTJ' ? '已提交' :
-							    	item.status == 'YLY' ? '已录用' : '未录用';
-								return item;
-							})
-						}
-					})
-	            }
 				
 				sDetailView = mui.preload({
 					url:'sDetail.html',
@@ -146,6 +513,24 @@
 					},//窗口参数
 					extras:{}//自定义扩展参数
 				})
+
+                mySuggestListView = mui.preload({
+                    url:'mySuggestList.html',
+                    id: App.name + 'sug/mySuggestList.html',
+                    styles: {
+                        popGesture: 'hide'
+                    },//窗口参数
+                    extras:{}//自定义扩展参数
+                })
+
+                messageView = mui.preload({
+                    url:'message.html',
+                    id: App.name + 'sug/message.html',
+                    styles: {
+                        popGesture: 'hide'
+                    },//窗口参数
+                    extras:{}//自定义扩展参数
+                })
 				
 				
 				openDetail = function(item) {
@@ -155,49 +540,38 @@
 					})
 					sDetailView.show("pop-in",300);
 				}
-				
-				document.getElementById("edit").addEventListener("tap",function(){
-					mui.fire(submitView, "data_transfer",{
-						data:thisView.data
-					})
-					submitView.show("pop-in",300);
-				})
-				
-				document.getElementById("draft").addEventListener("tap",function(){
-					mui.fire(draftView, "data_transfer",{
-						data:thisView.data
-					})
-					draftView.show("pop-in",300);
-				})
+
+                openSubmit = function(item) {
+                    mui.fire(submitView,"data_transfer",{
+                        data:thisView.data,
+                        manuscripts:item
+                    })
+                    submitView.show("pop-in",300);
+                }
+
+                openDraft = function() {
+                    mui.fire(draftView,"data_transfer",{
+                        data:thisView.data,
+                    })
+                    draftView.show("pop-in",300);
+                }
+
+                openMySuggestList = function() {
+                    mui.fire(mySuggestListView,"data_transfer",{
+                        data:thisView.data,
+                    })
+                    mySuggestListView.show("pop-in",300);
+                }
+
+                openMessage = function() {
+                    mui.fire(messageView,"data_transfer",{
+                        data:thisView.data,
+                    })
+                    messageView.show("pop-in",300);
+                }
+
 			})
-			
-			/**
-			 * 下拉刷新具体业务实现
-			 */
-			function pulldownRefresh() {
-				var searchInput = document.getElementById("searchInput");
-				setTimeout(function() {
-					getSuggests(vm,page1.size,1,searchInput.value, thisView.data.webAccount.id); 
-					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
-				}, 1500);
-			}
-			var count = 0;
-			/**
-			 * 上拉加载具体业务实现
-			 */
-			function pullupRefresh() {
-				var searchInput = document.getElementById("searchInput");
-				setTimeout(function() {
-					getSuggests(vm,page1.size,page1.numb++,searchInput.value, thisView.data.webAccount.id); 
-					mui('#pullrefresh').pullRefresh().endPullupToRefresh(page1.isLast); //参数为true代表没有更多数据了。
-				}, 1500);
-			}
-			
-			function onSearchChange(th) {
-				page1.numb = 1;
-				getSuggests(vm,page1.size,page1.numb++,th.value, thisView.data.webAccount.id); 
-			}
-			
+						
 			document.querySelector("header > .mui-icon-person").addEventListener("tap",function(){
 				plus.webview.currentWebview().parent().evalJS("openUserView()");
 			})

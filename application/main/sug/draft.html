@@ -18,28 +18,29 @@
 		</header>
 		<div class="mui-content">
 			<div class="mui-input-row mui-search">
-			    <input id="searchInput" onchange="onSearchChange(this)" type="search" class="mui-input" placeholder="">
+			    <input id="searchInput" onchange="onSearchChange(this)" type="search" class="mui-input" placeholder="按标题搜索">
 			</div>
 			<div id="pullrefresh" class="mui-scroll-wrapper" style="top: 80px;">
 				<div class="mui-scroll">
 					<!--数据列表-->
 					<ul id="vue1" class="mui-table-view">
-						<li v-for="item in items" class="mui-table-view-cell">
-							<a class="">
-								<p>
-									<span>界别：{{item.typeText}}</span>
-									<span class="mui-pull-right">
-										<span @tap="deleteItem(item)" class="mui-icon mui-icon-trash" style="color: red;"></span>
-										&nbsp;&nbsp;&nbsp;
-										<span @tap="openSubmit(item)" class="mui-icon mui-icon-compose" style="color: blue"></span>
-									</span>
-					            </p>
-					            <h4>{{item.title}}</h4>
-					            <p class="zui-sug-content">
-					                {{item.content}}
-					            </p>
-							</a>
-						</li>
+						<div v-for="item in items" >
+							<div class="mui-card">
+								<div class="mui-card-header">
+						            <b>约稿主题：{{item.manuscripts.title}}</b>
+						        </div>
+								<div class="mui-card-content">
+									<div class="mui-card-content-inner">
+						                <b>标题：{{item.title}}</b><br/><br/>
+						                <p><b>内容：</b>{{App.util.truncateString(item.content,100)}}</p>
+									</div>
+								</div>
+								<div class="mui-card-footer">
+									<a @tap="deleteItem(item)" style="color: lightcoral;" class="mui-card-link">删除</a>
+						            <a @tap="openSubmit(item)" class="mui-card-link">编辑</a> 
+								</div>
+							</div>
+						</div>
 					</ul>
 				</div>
 			</div>
@@ -66,60 +67,55 @@
 			var vm = new Vue({
 				el: "#vue1",
 				data: {
-					items: []
+					items: [],
+					pageNo: 1,
+					isLast: false
 				}
 			});
 			
-			var page1 = {
-				size: 10,
-				numb: 1,
-				isLast: false
+			var thisPage = {
+				pageSize: 10,
 			}
 			
 			var deleteItem = function(){};
 			var openSubmit = function(){};
-			var getSuggests = function(){};
 			
 			var submitView = null;
 			
 			var thisView = {};
-				
+						
+			function getSuggests(vue,pageNo,title) {
+				App.ajax({
+					line: 167,
+					url: "/front/suggest/status.do",
+					data:{
+						createUserId:thisView.data.webAccount.id || '',
+						pageSize:thisPage.pageSize,
+						pageNo:pageNo,
+						status:'CG',
+						title: title || ''
+					},
+					success: function(data) {
+						var others = data.data.content || [];
+						if(pageNo == 1) vue.items = others || [];
+						else vue.items.concat(others);
+						vue.isLast = others.length < thisPage.pageSize;
+					}
+				})
+			}
+			
+			function refresh() {
+				getSuggests(vm,1,searchInput.value);
+			}
+							
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
-				page1.numb = 1;
 				var searchInput = document.getElementById("searchInput");
-				getSuggests(vm,page1.size,page1.numb++,searchInput.value,thisView.data.webAccount.id);
+				getSuggests(vm,1,searchInput.value);
 			},false);
 			
 			mui.plusReady(function() {
-				
-				getSuggests = function(vue,pageSize,pageNo,title,createdUserId) {
-					var updata = {
-		      			createUserId:createdUserId || 0,
-	                     pageSize:pageSize,
-	                     pageNo:pageNo,
-	                     title:title || '',
-	                     status:'CG'
-		      		}
-					App.ajax({
-						line: 105,
-						url: "/front/suggest/type.do",
-						data:updata,
-						success: function(data) {
-							page1.isLast = data.data.last || false;
-							if(pageNo == 1) vue.items = data.data.content || [];
-							else vue.items.concat(data.data.content || []);
-							
-							vue.items = vue.items.map(function(item){
-								item.typeText = item.type == "ALL" ? "所有界别" : item.type == "MM"? "民盟" : "民革";
-								item.status = item.status == 'CG' ? '草稿' : item.status == 'YTJ' ? '已提交' :
-							    	item.status == 'YLY' ? '已录用' : '未录用';
-								return item;
-							})
-						}
-					})
-	            }
-				
+								
 				submitView = mui.preload({
 					url:'submit.html',
 					id: App.name + 'draft/submit.html',
@@ -132,14 +128,14 @@
 				openSubmit = function(item) {
 					mui.fire(submitView,"data_transfer",{
 						data:thisView.data,
-						suggest:item
+						suggest:item,
+						manuscripts:item.manuscripts
 					})
 					submitView.show("pop-in",300);
 				}
 				
 				deleteItem = function(item) {
 					mui.confirm("确定删除吗？","删除提示",["取消","确定"],function(e){
-						console.log(e.index);
 						if(e.index != 1) return;
 						var updata = {id:item.id};
 						App.ajax({
@@ -160,7 +156,7 @@
 			function pulldownRefresh() {
 				var searchInput = document.getElementById("searchInput");
 				setTimeout(function() {
-					getSuggests(vm,page1.size,1,searchInput.value, thisView.data.webAccount.id); 
+					getSuggests(vm,1,searchInput.value); 
 					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
 				}, 1500);
 			}
@@ -171,14 +167,13 @@
 			function pullupRefresh() {
 				var searchInput = document.getElementById("searchInput");
 				setTimeout(function() {
-					getSuggests(vm,page1.size,page1.numb,searchInput.value, thisView.data.webAccount.id); 
-					mui('#pullrefresh').pullRefresh().endPullupToRefresh(page1.isLast); //参数为true代表没有更多数据了。
+					getSuggests(vm,vm.pageNo++,searchInput.value); 
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh(vm.isLast); //参数为true代表没有更多数据了。
 				}, 1500);
 			}
 			
 			function onSearchChange(th) {
-				page1.numb = 1;
-				getSuggests(vm,page1.size,page1.numb,th.value, thisView.data.webAccount.id); 
+				getSuggests(vm,1,searchInput.value); 
 			}
 			
 			
