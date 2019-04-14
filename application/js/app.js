@@ -1,10 +1,9 @@
 (function($,owner){
-	var openDebug = true;
+	var openDebug = false;
 	owner.name = "unitedFront",
 	owner.config = {
-		// serverUrl:"https://tongzhan.info"
-		//serverUrl:"http://192.168.2.242:8080"
-		serverUrl:"http://192.168.1.100:8088"
+		serverUrl:"https://tongzhan.info"
+		// serverUrl:"http://192.168.1.100:8088"
 	};
 	
 	owner.util = {
@@ -131,7 +130,7 @@
 					errorText = "网络连接中断了呢";
 					break;
 				case "parsererror":
-					errorText = "图片加载出了点问题";
+					errorText = "解析数据时出了点问题";
 					break;
 				default:
 					break;
@@ -142,11 +141,6 @@
 	owner.ajax = function(options) {
 		var url = options.url || "";
 		url = App.config.serverUrl + url;
-		var needToken = !/(\/login\.do|\/front\/noauth\/|\/front\/main\/)/.test(url);
-		if(needToken) {
-			var isTokenTimeout = App.getData("isTokenTimeout") || false;
-			if(isTokenTimeout) return;
-		}
 		App.util.print(options.line,url,options.data || {}); 
 		var currentUser = null;
 		var wait = null;
@@ -154,8 +148,10 @@
 			currentUser = App.getData("currentUser");
 			wait = plus.nativeUI.showWaiting("处理中...");
 		} 
+		var async = true;
+		if(false === options.async) async = false;
 		mui.ajax(url,{
-			async:true,//是否异步
+			async:async,//是否异步
 			crossDomain:true,//强制使用5+跨域
 			data:options.data || {},
 			dataType:'json',//服务器返回json格式数据
@@ -168,20 +164,17 @@
 			},	              
 			success:function(data){
 				if(wait != null) wait.close();
+				var href = location.href;
 				//服务器返回响应，根据响应结果，分析是否登录成功；
 				if(data.success) {
 					options.success(data);
 				}else{
 					if("登陆令牌已失效，请重新登陆！" == data.message) {
+						// 如果请求来自于首页，则不跳登陆；
+						if(/news\/index\.html$/.test(href)) return;
 						if(typeof(plus) !== "undefined") {
                             plus.webview.getLaunchWebview().evalJS("openLoginView()");
                         }
-//						App.setData("isTokenTimeout",true);
-//                      mui.alert(data.message,"提示","确定",function () {
-//                          if(typeof(plus) !== "undefined") {
-//                              plus.webview.getLaunchWebview().evalJS("openLoginView()");
-//                          }
-//                      })
 					} else {
                         mui.toast(data.message);
                     }

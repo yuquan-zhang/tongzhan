@@ -301,7 +301,7 @@
 				swipeBack: false,
 			});
 			
-			var pageSize = 10;
+			var pageSize = 5;
 			
 			var vms = [];
 			
@@ -361,28 +361,6 @@
 			});
 			vms[5] = vm6;
 			
-			(function (advise) {
-				//CG("草稿"),DSH("待审核"),DHXG("打回修改"),BY("备用"),CY("采用"),LC("留存");
-				var suggestStatues = [];
-				App.ajax({
-					line: 300,
-					url: "/front/suggest/suggestStatuses.do",
-					data:{},
-					success: function(data) {
-						suggestStatues = data.data || [];
-					}
-				})
-
-				advise.getStatusName = function(value) {
-					for(var i = 0; i < suggestStatues.length; ++i) {
-						if(value == suggestStatues[i].val) {
-							return suggestStatues[i].title;
-						}
-					}
-					return "";
-				}
-			})(window.advise = {});
-			
 			function getSuggests(vue,pageNo,status) {
 				App.ajax({
 					line: 298,
@@ -429,14 +407,35 @@
 			var thisView = {};
 			
 			window.addEventListener("data_transfer",function(e){
-				App.util.print(276,e.detail.data); 
 				thisView.data = e.detail.data;
 				refresh();
 			},false);
 			
 			function refresh() {
+				if(typeof(advise) == 'undefined') {
+					(function (advise) {
+						//CG("草稿"),DSH("待审核"),DHXG("打回修改"),BY("备用"),CY("采用"),LC("留存");
+						var suggestStatues = [];
+						App.ajax({
+							line: 300,
+							url: "/front/suggest/suggestStatuses.do",
+							data:{},
+							success: function(data) {
+								suggestStatues = data.data || [];
+							}
+						})
+					
+						advise.getStatusName = function(value) {
+							for(var i = 0; i < suggestStatues.length; ++i) {
+								if(value == suggestStatues[i].val) {
+									return suggestStatues[i].title;
+								}
+							}
+							return "";
+						}
+					})(window.advise = {});
+				}
 				for(var i = 0, len = vms.length; i < len; i++){
-					initVue(vms[i])
 					getSuggests(vms[i],1,statuses[i]);
 				}
 			}
@@ -545,8 +544,6 @@
 								}
 							})
 						}
-						
-						refresh();
 					})
 				});
 								

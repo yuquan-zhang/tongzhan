@@ -97,23 +97,16 @@
 				padding: 5px;
 				height: 200px;
 				position: fixed;
-				background-color: #ffffff;
-				border: 1px solid lightgrey;
-				border-radius: 5px;
+				border-radius: 20px;
 				z-index: 1000;
 				display: block;
+				background-color:#FFFFFF;
+				opacity: 1;
 			}
-			.zui-suggest-button, .zui-manuscript-title, .zui-manuscript-Content {
-				position: absolute;
-				bottom: 50px;
-				text-align: center;
-				width: 100%;
-			}
-			.zui-manuscript-title {
-				bottom: 300px;
-			}
-			.zui-manuscript-Content {
-				bottom: 200px;
+			div.mui-card {
+				background-color:#FFFFFF;
+				opacity: 1;
+				border-radius: 10px;
 			}
 		</style>
 	</head>
@@ -243,21 +236,19 @@
 					<div class="zui-col-11">&nbsp;</div>
 					<div @tap="has = !has" class="zui-col-1" style="color: red">X</div>
 				</div>
-				<div id="manuTitle" class="zui-manuscript-title">
-					{{manuscripts.title}}
-				</div>
-				<div id="manuContent" class="zui-manuscript-Content">
-					{{manuscripts.content}}
-				</div>
-				<div class="zui-suggest-button">
-					<div class="zui-row">
-						<div class="zui-col-2">&nbsp;</div>
-						<div class="zui-col-8">
-							<a @tap="goSuggest(manuscripts)" class="btn btn-primary">立即发表建言</a>
+				<div class="mui-card">
+					<div class="mui-card-header">{{manuscripts.title}}</div>
+					<div class="mui-card-content">
+						<div class="mui-card-content-inner" style="height: 100px;overflow: scroll;">
+							{{manuscripts.content}}
 						</div>
-						<div class="zui-col-2">&nbsp;</div>
+					</div>
+					<div class="mui-card-footer">
+						<a @tap="has = !has" class="mui-card-link">关闭</a>
+						<a @tap="goSuggest(manuscripts)" class="mui-card-link">立即发表建言</a>
 					</div>
 				</div>
+				
 			</div>
 		</div>
 		<script src="../../js/mui.min.js"></script>
@@ -270,7 +261,7 @@
 				swipeBack: false,
 			});
 			
-			var pageSize = 10;
+			var pageSize = 5;
 			var vms = [];
 			
 			var upHead = new Vue({
@@ -340,13 +331,13 @@
 				el: "#popup",
 				data: {
 					styleObject: {
-						height: (screen.availHeight / 5 * 3) + "px",
-						top: (screen.availHeight / 5) + "px",
+						height: "250px",
+						top: (screen.availHeight / 10 * 3) + "px",
                         width: (screen.availWidth / 10 * 8) + "px",
                         left: (screen.availWidth / 10) + "px"
 					},
 					manuscripts: {},
-					has:false
+					has:true
 				},
 				methods: {
 					goSuggest: function(manuscripts) {
@@ -391,7 +382,11 @@
 								vue.has = true;
 								vue.manuscripts = manuscripts;
 								changeNewestManuscriptsId(thisView.data.webAccount.id, manuscripts.id);
+							}else{
+								vue.has = false;
 							}
+						} else {
+							vue.has = false;
 						}
 			        }
 			    });
@@ -400,10 +395,14 @@
 			function refresh() {
 				var currentUser = thisView.data;
 				if(currentUser != null && currentUser.webAccount != null && currentUser.webAccount.authenticated == '1') {
-					mui.later(getManuscriptsPage(popup,1),1000);
+					setTimeout(function(){
+						getManuscriptsPage(popup,1)
+					},1000);
+				} else {
+					popup.has = false;
 				}
 				getNewest(upHead,1);
-				for(var i = 0; i < 5; i++){
+				for(var i = 0; i < 1; i++){
 					getNewsByGenre(genres[i],vms[i],pageSize,1,'');
 				}
 			}
@@ -444,8 +443,6 @@
 				})
             }
 
-            getNewest(upHead,1);
-
 			(function($) {
 				//阻尼系数
 				var deceleration = mui.os.ios?0.003:0.0009;
@@ -464,11 +461,12 @@
 		      		}
 					App.ajax({
 						line: 312,
+						async: false, 
 						url: "/front/main/genre.do",
 						data:updata,
 						success: function(data) {
-							vue.isLast = data.data.last || false;
 							var newpage = data.data.content || [];
+							vue.isLast = newpage.length < pageSize;
 							newpage = newpage.map(function(item){
                                 item.img = App.config.serverUrl + item.img;
                                 item.publishTime = App.util.dateFormat(item.publishTime);
@@ -504,6 +502,14 @@
 							}
 						});
 					});
+					
+					document.getElementById('slider').addEventListener('slide', function(e) {
+						var i = e.detail.slideNumber;
+						if(vms[i].items.length <= 0) {
+							getNewsByGenre(genres[i],vms[i],pageSize,1,'');
+						}
+					});
+					
 					$.plusReady(function(){
 						detailView = mui.preload({
 							url:'nDetail.html',

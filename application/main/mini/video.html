@@ -36,11 +36,12 @@
 		    <div class="mui-scroll-wrapper zui-scroll-wrapper" style="top:46px;bottom: 40px;">
 		        <div class="mui-scroll">
 		            <div id="vue1">
-			            	<video width="100%" height="240" controls>
-	                         <source :src="item.videoPath" type="video/mp4">
-	                         <source :src="item.videoPath" type="video/ogg">
+						<div style="width: 100%; height: 240px;"></div>
+			            <!-- <video width="100%" height="240" controls>
+	                         <source webkit-playsinline :src="item.videoPath" type="video/mp4" preload>
+	                         <source webkit-playsinline :src="item.videoPath" type="video/ogg" preload>
 	                         Your browser does not support the video tag.
-	                     </video>
+	                     </video> -->
 		        			<div style="padding: 5px;">
 		        				<h4>{{item.title}}</h4>
 			            		<p><span>{{item.publishTime}}</span></p>
@@ -58,6 +59,7 @@
 			            		</div>
 		        			</div>
 		        		</div>
+						<!-- <button onclick="createVideoPlayer()">创建视频播放控件</button> -->
 		        </div>
 		    </div>
 		    <div class="zui_footer">
@@ -68,6 +70,7 @@
 		<script src="../../js/vue.min.js"></script>
 		<script src="../../js/app.js"></script>
 		<script type="text/javascript">
+			var player = null;
 			
 			var vm = new Vue({
 				el: "#vue1",
@@ -76,11 +79,37 @@
 				}
 			})
 			
+			// 创建视频播放控件
+			function createVideoPlayer() {
+				if(!player){
+					player = plus.video.createVideoPlayer('videoplayer', {
+						src:vm.item.videoPath,
+						top:'10px',
+						left:'0px',
+						width: '100%',
+						height: '240px',
+						position: 'static'
+					});
+					plus.webview.currentWebview().append(player);
+				}
+			}
+			
+			// 移除子Webview窗口
+			function removePlayer() {
+				if(player != null) {
+					plus.webview.currentWebview().remove(player);
+					player.close();
+					player = null;
+				}
+			}
+			
 			var thisView = {};
 				
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
 				vm.item = e.detail.item;
+				removePlayer();
+				createVideoPlayer();
                 vm.item.detail = vm.item.detail.replace(/(img[^\<|\>]* src=\")(\/userfile\/ueditor\/upload\/image\/[\w|\d|\/]*\.\w{1,5})(\")/g,"$1" + App.config.serverUrl + "$2$3");
 				var applyBtn = document.getElementById("apply");
 				if(vm.item.isLearned) {

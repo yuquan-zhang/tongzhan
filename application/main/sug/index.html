@@ -236,7 +236,7 @@
 			});
 			
 			var thisPage = {
-				pageSize : 10,
+				pageSize : 5,
 			};
 
 			var thisView = {};
@@ -403,21 +403,7 @@
 				getManuscriptsPage(manuscripts,1, element.value);
 			}
 
-			(function (advise) {
-				advise.getNameInList = function (list, value) {
-					for(var i = 0; i < list.length; ++i) {
-						if(value == list[i].val) {
-							return list[i].title;
-						}
-					}
-					return '';
-				}
-				var obj = {};
-				getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
-				advise.getStatusName = function(value) {
-					return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
-				}
-			})(window.advise = {});
+			
 
             thisPage.init = function() {
                 initVue(suggests);
@@ -431,12 +417,29 @@
             }
 			
 			function refresh() {
+				if(typeof(advise) == 'undefined') {
+					(function (advise) {
+						advise.getNameInList = function (list, value) {
+							for(var i = 0; i < list.length; ++i) {
+								if(value == list[i].val) {
+									return list[i].title;
+								}
+							}
+							return '';
+						}
+						var obj = {};
+						getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
+						advise.getStatusName = function(value) {
+							return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
+						}
+					})(window.advise = {});
+				}
 				thisPage.init();
 			}
 			
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
-				thisPage.init();
+				refresh();
 			},false);
 			
 			mui.ready(function($){

@@ -127,39 +127,36 @@
 					});
 				}
 
-				(function (advise) {
-					advise.getNameInList = function (list, value) {
-						for(var i = 0; i < list.length; ++i) {
-							if(value == list[i].val) {
-								return list[i].title;
-							}
-						}
-						return '';
-					}
-					var obj = {};
-					getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
-					advise.getStatusName = function(value) {
-						return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
-					}
-					getDictionary('SUGGEST_TASK',obj,'SUGGEST_TASK');
-					advise.getTaskName = function(value) {
-						return advise.getNameInList(obj['SUGGEST_TASK'] || [],value);
-					}
-					getDictionary('SUGGEST_USER_TYPE',obj,'SUGGEST_USER_TYPE');
-					advise.getUserTypeName = function(value) {
-						return advise.getNameInList(obj['SUGGEST_USER_TYPE'] || [],value);
-					}
+				function refresh() {
+				    if(typeof(advise) == 'undefined') {
+                        (function (advise) {
+                            advise.getNameInList = function (list, value) {
+                                for(var i = 0; i < list.length; ++i) {
+                                    if(value == list[i].val) {
+                                        return list[i].title;
+                                    }
+                                }
+                                return '';
+                            }
+                            var obj = {};
+                            getDictionary('SUGGEST_TASK',obj,'SUGGEST_TASK');
+                            advise.getTaskName = function(value) {
+                                return advise.getNameInList(obj['SUGGEST_TASK'] || [],value);
+                            }
 
-					getDictionary('AUDIT_RESULT',obj,'AUDIT_RESULT');
-					advise.getAuditResultName = function(value) {
-						return advise.getNameInList(obj['AUDIT_RESULT'] || [],value);
-					}
+                            getDictionary('AUDIT_RESULT',obj,'AUDIT_RESULT');
+                            advise.getAuditResultName = function(value) {
+                                return advise.getNameInList(obj['AUDIT_RESULT'] || [],value);
+                            }
 
-				})(window.advise = {});
+                        })(window.advise = {});
+                    }
+                }
 				
 				window.addEventListener("data_transfer",function(e){
 					thisView.data = e.detail.data;
 					vm.suggest = thisView.suggest = e.detail.suggest || {};
+                    refresh();
 					App.ajax({
 						line: 163,
 						url: "/front/suggest/getSuggestTaskList.do",

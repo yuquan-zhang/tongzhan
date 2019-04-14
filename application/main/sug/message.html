@@ -94,22 +94,6 @@
 				})
 			}
 			
-			(function (advise) {
-				advise.getNameInList = function (list, value) {
-					for(var i = 0; i < list.length; ++i) {
-						if(value == list[i].val) {
-							return list[i].title;
-						}
-					}
-					return '';
-				}
-				var obj = {};
-				getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
-				advise.getStatusName = function(value) {
-					return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
-				}
-			})(window.advise = {});
-			
 			function updateMessageStatus(messageId) {
 				App.ajax({
 					line: 89,
@@ -140,11 +124,31 @@
 					}
 				})
 			}
+			
+			function refresh() {
+				if(typeof(advise) == 'undefined') {
+					(function (advise) {
+						advise.getNameInList = function (list, value) {
+							for(var i = 0; i < list.length; ++i) {
+								if(value == list[i].val) {
+									return list[i].title;
+								}
+							}
+							return '';
+						}
+						var obj = {};
+						getDictionary('SUGGEST_STATUS',obj,'SUGGEST_STATUS');
+						advise.getStatusName = function(value) {
+							return advise.getNameInList(obj['SUGGEST_STATUS'] || [],value);
+						}
+					})(window.advise = {});
+				}
+			}
 							
 			window.addEventListener("data_transfer",function(e){
 				thisView.data = e.detail.data;
+				refresh();
 				getMessages(vm,1);
-				console.log("data_transfer");
 			},false);
 			
 			mui.plusReady(function() {

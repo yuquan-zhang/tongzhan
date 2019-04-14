@@ -70,6 +70,19 @@
 							mui.alert("两次输入的新密码不一致");
 							return;
 						}
+						var passwordConfirm = confirmBox.value;
+						if(passwordConfirm.trim().length < 6) {
+							mui.alert("密码长度不能小于6位");
+							return;
+						}
+						if(passwordConfirm.trim().search(/[a-z]/i) < 0) {
+							mui.alert("密码必须包含字母");
+							return;
+						}
+						if(passwordConfirm.trim().search(/\d/) < 0) {
+							mui.alert("密码必须包含数字");
+							return;
+						}
 						var updata = {
 		                    loginName:thisView.data.webAccount.loginName,
 	                        oldPassword:oldPasswordBox.value,
@@ -81,7 +94,7 @@
 							data:updata,
 							success: function(data) {
 								mui.alert(data.data,"提示","好的",function(e){
-									plus.webview.getLaunchWebview().show("pop-in",300);
+									plus.webview.getLaunchWebview().evalJS("openLoginView()");
 								})
 							}
 						})

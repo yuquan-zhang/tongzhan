@@ -62,9 +62,9 @@
 			<h1 class="mui-title">登录</h1>
 		</header>
 		<div class="mui-content">
-			<div>
+			<!-- <div>
 				<img style="width: 100%;" src="img/user-background.jpg" />
-			</div>
+			</div> -->
 			<form id='login-form' class="mui-input-group">
 				<div class="mui-input-row">
 					<label>账&nbsp;&nbsp;&nbsp;&nbsp;号</label>
@@ -100,11 +100,17 @@
 	      		swipeBack:false,
 	      	}); 
 	      	var menuView = null; 
+			
+			window.addEventListener("data_transfer",function(e){
+				document.getElementById("account").value = "";
+				document.getElementById("password").value = "";
+			},false);
+			
 	      	mui.plusReady(function(){
 	      		plus.navigator.setStatusBarBackground("#007AFF");
-	      		var loginInfo = App.getData("loginInfo") || {};
-				document.getElementById("account").value = loginInfo.loginName || "";
-				document.getElementById("password").value = loginInfo.password || "";
+// 	      		var loginInfo = App.getData("loginInfo") || {};
+// 				document.getElementById("account").value = loginInfo.loginName || "";
+// 				document.getElementById("password").value = loginInfo.password || "";
 				
 	      		function toHomeMenu(data) {
 					App.setData("currentUser",data);
@@ -123,7 +129,7 @@
 		      			loginName:account,
 		      			password:password
 		      		}
-					App.setData("loginInfo",updata);
+// 					App.setData("loginInfo",updata);
 					App.setData("isTokenTimeout",false);
 					App.ajax({
 						line: 134,
