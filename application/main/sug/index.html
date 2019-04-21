@@ -99,6 +99,9 @@
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-icon mui-icon-person mui-pull-left"></a>
 		    <h1 class="mui-title">建言献策</h1>
+			<button style="background-color: white;" type="button" onclick="openSubmit()" class="mui-btn mui-pull-right">
+				写建言
+			</button>
 		</header>
 		<div class="mui-content">
 			<div id="slider" class="mui-slider mui-fullscreen">
@@ -156,8 +159,18 @@
 					<div id="item2mobile" class="mui-slider-item mui-control-content">
 						<div class="mui-scroll-wrapper">
 							<div class="mui-scroll">
-								<div class="mui-input-row mui-search">
+								<!-- <div class="mui-input-row mui-search">
 								    <input onchange="onSearchChange2(this)" type="search" class="mui-input" placeholder="按主题搜索">
+								</div> -->
+								<div class="mui-row">
+									<div class="mui-col-xs-10 mui-col-sm-10">
+										<input style="width: 100%;" id="searchInput2" onchange="onSearchChange2()" type="search" class="mui-input" placeholder="按主题搜索">
+									</div>
+									<div class="mui-col-xs-2 mui-col-sm-2">
+										<button style="width: 100%;" type="button" onclick="onSearchChange2()" class="mui-btn mui-btn-primary">
+								            搜索
+								        </button>
+									</div>
 								</div>
 								<ul id="vue2" class="mui-table-view">
 									<div v-for="item in items" >
@@ -338,8 +351,14 @@
 							result.status = advise.getStatusName(value.status);
 							return result;
 						});
-						if(pageNo == 1) vue.items = news || [];
-						else vue.items.concat(news);
+						if(pageNo == 1) {
+							vue.items = news || [];
+							vue.isLast = false;
+						} else {
+							for(var item in news) {
+								vue.items.push(news[item]);
+							}
+						}
 						vue.isLast = others.length < thisPage.pageSize;
 					}
 				})
@@ -402,14 +421,22 @@
 							result.endTime = App.util.dateFormat2(value.endTime);
 							return result;
 						});
-						if(pageNo == 1) vue.items = news || [];
-						else vue.items.concat(news);
+						if(pageNo == 1) {
+							vue.isLast = false;
+							vue.items = news || [];
+						}
+						else {
+							for(var item in news) {
+								vue.items.push(news[item]);
+							}
+						} 
 						vue.isLast = others.length < thisPage.pageSize;
 					}
 				})
 			}
 			
-			function onSearchChange2(element) {
+			function onSearchChange2() {
+				var element = document.getElementById("searchInput2");
 				getManuscriptsPage(manuscripts,1, element.value);
 			}
 

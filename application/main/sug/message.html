@@ -119,7 +119,11 @@
 					success: function(data) {
 						var others = data.data.content || [];
 						if(pageNo == 1) vue.items = others || [];
-						else vue.items.concat(others);
+						else {
+							for(var item in others) {
+								vue.items.push(others[item]);
+							}
+						} 
 						vue.isLast = others.length < thisPage.pageSize;
 					}
 				})
@@ -190,6 +194,7 @@
 			 */
 			function pulldownRefresh() {
 				setTimeout(function() {
+					vm.isLast = false;
 					getMessages(vm,1); 
 					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
 				}, 1500);

@@ -21,6 +21,13 @@
 				width: 100%;
 				border-top: 1px outset lightgray;
 			}
+			#newsDetail {
+				width: 100%;
+				padding: 0.2em;
+			}
+			#newsDetail img {
+				width: 90%;
+			}
 		</style>
 	</head>
 
@@ -38,7 +45,7 @@
 		        				<h4>{{item.title}}<sub class="mui-pull-right">{{item.type}}</sub></h4>
 			            		<p><span style="color: red;">{{item.status}}</span></p>
 			            		<p><span ><b>时间</b>：{{item.holdTime}}</span>&nbsp;|&nbsp;<span><b>地点</b>：{{item.holdAddress}}</span></p>
-			            		<div v-html="item.description">
+			            		<div id="newsDetail" v-html="item.description">
 			            		</div>
 		        			</div>
 		        			

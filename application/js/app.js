@@ -2,8 +2,9 @@
 	var openDebug = false;
 	owner.name = "unitedFront",
 	owner.config = {
-		serverUrl:"https://tongzhan.info"
-		// serverUrl:"http://192.168.1.100:8088"
+		// serverUrl:"https://tongzhan.info",
+		serverUrl:"http://211.136.105.83"
+		// serverUrl:"http://192.168.1.102:8088"
 	};
 	
 	owner.util = {

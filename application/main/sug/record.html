@@ -106,6 +106,7 @@
 				
 				function getSuggestTasVariables(task) {
 					App.ajax({
+						async: false,
 						line:109,
 						url: "/front/suggest/getSuggestTaskVariables.do",
 						data:{
@@ -158,6 +159,7 @@
 					vm.suggest = thisView.suggest = e.detail.suggest || {};
                     refresh();
 					App.ajax({
+						async: false,
 						line: 163,
 						url: "/front/suggest/getSuggestTaskList.do",
 						data:{

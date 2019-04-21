@@ -269,19 +269,23 @@
 						url: "/front/acti/activities.do",
 						data:updata,
 						success: function(data) {
-							vue.isLast = data.data.last || false;
-							if(pageNo == 1) vue.items = data.data.content || [];
-							else vue.items.concat(data.data.content || []);
-							
-							vue.items = vue.items.map(function(value){
+							var others = data.data.content || [];
+							var news = others.map(function (value) {
 								var result = value;
 								result.status = (new Date().getTime()) > value.endTime ? '报名截止' : '报名进行中';
-							     result.type = value.type == 'ALL' ? '所有界别' : value.type == 'MM' ? '民盟' : '民革';
 							     result.isApply = isApply(value,vm2.origin);
 							     result.img = App.config.serverUrl + value.img;
 							     result.holdTime = App.util.dateFormat(result.holdTime);
 							     return result;
-							})
+							});
+							if(pageNo == 1){
+								vue.items = news || [];
+							} else {
+								for(var item in news) {
+									vue.items.push(news[item]);
+								}
+							}
+							vue.isLast = others.length < pageSize;
 						}
 					})
 				}
@@ -295,7 +299,11 @@
 									var self = this;
 									setTimeout(function() {
 										if(index == 1) getMyActivities(vms[index],thisView.data.id);
-										else getActivityByGenre(vms[index],pageSize,1,'');
+										else{
+											vms[index].pageNo = 1;
+											vms[index].isLast = false;
+											getActivityByGenre(vms[index],pageSize,1,'');
+										} 
 										self.endPullDownToRefresh();
 									}, 1000);
 								}
@@ -311,6 +319,7 @@
 							}
 						});
 					});
+					mui('.mui-slider').slider().stopped = true;
 					
 					$.plusReady(function(){
 						detailView = mui.preload({

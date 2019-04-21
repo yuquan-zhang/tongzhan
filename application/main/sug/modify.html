@@ -28,7 +28,15 @@
 						<div class="mui-input-row">
 							<label>约稿主题</label>
 							<input id='subject' v-model="manuscripts.title" type="text" class="mui-input" placeholder="" readonly="readonly">
-						</div>						
+						</div>		
+						<div class="mui-input-row">
+							<label>政治面貌</label>
+							<input id='clan' v-model="suggest.clan" type="text" class="mui-input" placeholder="请输入您的政治面貌" >
+						</div>
+						<div class="mui-input-row">
+							<label>单位职务</label>
+							<input id='position' v-model="suggest.position" type="text" class="mui-input" placeholder="请输您的单位职务" >
+						</div>
 						<div class="mui-input-row">
 							<label>标题</label>
 							<input id='title' v-model="suggest.title" type="text" class="mui-input-clear mui-input" placeholder="请输入标题">
@@ -113,8 +121,13 @@
 				$.plusReady(function(){
 					
 					function uploadData(url) {
+			      		var clan = doc.getElementById("clan").value;
+                        var position = doc.getElementById("position").value;
 			      		var title = doc.getElementById("title").value;
 			      		var content = doc.getElementById("content").value;
+
+                        if(App.util.isEmpty(clan,"请输入您的政治面貌")) return;
+                        if(App.util.isEmpty(position,"请输入单位职务")) return;
 			      		if(App.util.isEmpty(title,"请输入标题")) return;
 			      		if(App.util.isEmpty(content,"请输入内容")) return;
 			      		var updata = {
@@ -122,6 +135,8 @@
 			      			id:vm.suggest.id || '',
 							taskId: vm.task.id || '',
 							manuscriptsId: vm.manuscripts.id || '',
+							clan:clan,
+							position: position,
 			      			title:title,
 			      			content: content
 			      		}

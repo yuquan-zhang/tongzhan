@@ -21,6 +21,13 @@
 				width: 100%;
 				border-top: 1px outset lightgray;
 			}
+			#newsDetail {
+				width: 100%;
+				padding: 0.2em;
+			}
+			#newsDetail img {
+				width: 90%;
+			}
 		</style>
 	</head>
 
@@ -37,7 +44,7 @@
 		        			<div style="padding: 5px;">
 		        				<h4>{{item.title}}&nbsp;|&nbsp;<span>{{item.speaker}}</span></h4>
 			            		<p><span ><b>日期</b>：{{App.util.dateFormat(item.speakDate).split(' ')[0]}}</span>&nbsp;|&nbsp;<span><b>时间</b>：{{item.speakTime}}</span></p>
-			            		<div v-html="item.summary">
+			            		<div id="newsDetail" v-html="item.summary">
 			            		</div>
 		        			</div>
 		        		</div>

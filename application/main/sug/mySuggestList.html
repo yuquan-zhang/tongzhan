@@ -363,6 +363,7 @@
 			
 			function getSuggests(vue,pageNo,status) {
 				App.ajax({
+					async:false,
 					line: 298,
 					url: "/front/suggest/status.do",
 					data:{
@@ -380,9 +381,13 @@
 							result.status = advise.getStatusName(value.status);
 							return result;
 						});
-						if(pageNo == 1) vue.items = news || [];
-						else vue.items.concat(news);
-						
+						if(pageNo == 1){
+							vue.items = news || [];
+						} else {
+							for(var item in news) {
+								vue.items.push(news[item]);
+							}
+						}
 						vue.isLast = others.length < pageSize;
 					}
 				})
@@ -466,7 +471,9 @@
 								callback: function() {
 									var self = this;
 									setTimeout(function() {
-										getSuggests(vms[index],1,statuses[index]);
+										vms[index].isLast = false;
+										vms[index].pageNo = 1;
+										getSuggests(vms[index],vms[index].pageNo,statuses[index]);
 										self.endPullDownToRefresh();
 									}, 1000);
 								}
@@ -482,6 +489,7 @@
 							}
 						});
 					});
+					mui('.mui-slider').slider().stopped = true;
 					$.plusReady(function(){
 						
 						detailView = mui.preload({

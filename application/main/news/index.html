@@ -118,7 +118,7 @@
 		</header>
 		<div class="mui-content">
 			<div id="sliders" class="mui-slider mui-fullscreen">
-				<a href="#">
+				<a @tap="openNewsDetail(news)">
 					<img style="width: 100%;" :src="news.img"  :alt="news.title" />
 					<p class="mui-slider-title">{{news.title}}</p>
 				</a>
@@ -149,7 +149,7 @@
 							<div class="mui-scroll">
 								<ul id="vue1" class="mui-table-view">
 									<li v-for="item in items" class="mui-table-view-cell mui-media">
-										<a @tap="openDetail(item)">
+										<a @tap="openNewsDetail(item)">
 											<img class="mui-media-object mui-pull-left" :src="item.img">
 											<div class="mui-media-body">
 												{{item.title}}
@@ -166,7 +166,7 @@
 							<div class="mui-scroll">
 								<ul id="vue2" class="mui-table-view">
 									<li v-for="item in items" class="mui-table-view-cell mui-media">
-										<a @tap="openDetail(item)">
+										<a @tap="openNewsDetail(item)">
 											<img class="mui-media-object mui-pull-left" :src="item.img">
 											<div class="mui-media-body">
 												{{item.title}}
@@ -183,7 +183,7 @@
 							<div class="mui-scroll">
 								<ul id="vue3" class="mui-table-view">
 									<li v-for="item in items" class="mui-table-view-cell mui-media">
-										<a @tap="openDetail(item)">
+										<a @tap="openNewsDetail(item)">
 											<img class="mui-media-object mui-pull-left" :src="item.img">
 											<div class="mui-media-body">
 												{{item.title}}
@@ -200,7 +200,7 @@
 							<div class="mui-scroll">
 								<ul id="vue4" class="mui-table-view">
 									<li v-for="item in items" class="mui-table-view-cell mui-media">
-										<a @tap="openDetail(item)">
+										<a @tap="openNewsDetail(item)">
 											<img class="mui-media-object mui-pull-left" :src="item.img">
 											<div class="mui-media-body">
 												{{item.title}}
@@ -217,7 +217,7 @@
 							<div class="mui-scroll">
 								<ul id="vue5" class="mui-table-view">
 									<li v-for="item in items" class="mui-table-view-cell mui-media">
-										<a @tap="openDetail(item)">
+										<a @tap="openNewsDetail(item)">
 											<img class="mui-media-object mui-pull-left" :src="item.img">
 											<div class="mui-media-body">
 												{{item.title}}
@@ -237,9 +237,9 @@
 					<div @tap="has = !has" class="zui-col-1" style="color: red">X</div>
 				</div>
 				<div class="mui-card">
-					<div class="mui-card-header">{{manuscripts.title}}</div>
+					<div class="mui-card-header" style="max-height: 100px;overflow: scroll;">{{manuscripts.title}}</div>
 					<div class="mui-card-content">
-						<div class="mui-card-content-inner" style="height: 100px;overflow: scroll;">
+						<div class="mui-card-content-inner" style="height: 150px;overflow: scroll;">
 							{{manuscripts.content}}
 						</div>
 					</div>
@@ -322,7 +322,7 @@
 			var genres = ['TZDT','PDYW','JCTZ','ZYYL','RWFQ'];
 			
 			var getNewsByGenre = function(){};
-			var openDetail = function(){};
+			var openNewsDetail = function(){};
 			var openSubmit = function(){};
 			var detailView = null;
 			var submitView = null;
@@ -438,7 +438,7 @@
 						var newpage = data.data || [];
 						vue.items = newpage.map(function(item){
 						    item.img = App.config.serverUrl + item.img;
-						    item.publishTime = App.util.dateFormat(item.publishTime);
+						    item.publishTime = App.util.dateFormat2(item.publishTime);
 							item.title = App.util.truncateString(item.title, 20);
 						    return item;
 						}); 
@@ -473,11 +473,15 @@
 							vue.isLast = newpage.length < pageSize;
 							newpage = newpage.map(function(item){
                                 item.img = App.config.serverUrl + item.img;
-                                item.publishTime = App.util.dateFormat(item.publishTime);
+                                item.publishTime = App.util.dateFormat2(item.publishTime);
                                 return item;
                             }); 
 							if(pageNo == 1) vue.items = newpage;
-                            else vue.items.concat(newpage);
+                            else {
+								for(var item in newpage) {
+									vue.items.push(newpage[item]);
+								}
+							}
 						}
 					})
 				}
@@ -490,6 +494,8 @@
 								callback: function() {
 									var self = this;
 									setTimeout(function() {
+										vms[index].pageNo = 1;
+										vms[index].isLast = false;
 										getNewsByGenre(genres[index],vms[index],pageSize,1,'');
 										self.endPullDownToRefresh();
 									}, 1000);
@@ -506,6 +512,7 @@
 							}
 						});
 					});
+					// mui('.mui-slider').slider().stopped = true;
 					
 					document.getElementById('slider').addEventListener('slide', function(e) {
 						var i = e.detail.slideNumber;
@@ -523,7 +530,7 @@
 							},
 						})
 						
-						openDetail = function(item) {
+						openNewsDetail = function(item) {
 							mui.fire(detailView,"data_transfer",{
 								data:thisView.data,
 								item:item

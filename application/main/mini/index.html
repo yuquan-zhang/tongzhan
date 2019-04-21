@@ -343,7 +343,12 @@
 							     return result;
 							});
 							if(pageNo == 1) vue.items = newpage;
-							else vue.items.concat(newpage);
+                            else {
+								for(var item in newpage) {
+									vue.items.push(newpage[item]);
+								}
+							}
+							vue.isLast = newpage.length < pageSize;
 						}
 					})
 				}
@@ -357,7 +362,11 @@
 									var self = this;
 									setTimeout(function() {
 										if(index == 2) getMyWeikes(vms[index],thisView.data.id);
-										else getWeikesByGenre(genres[index],vms[index],pageSize,1,'');
+										else {
+											vms[index].pageNo = 1;
+											vms[index].isLast = false;
+											getWeikesByGenre(genres[index],vms[index],pageSize,1,'');
+										}
 										self.endPullDownToRefresh();
 									}, 1000);
 								}
@@ -374,6 +383,7 @@
 							}
 						});
 					});
+					mui('.mui-slider').slider().stopped = true;
 					
 					$.plusReady(function(){
 						docsView = mui.preload({
