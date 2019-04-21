@@ -119,8 +119,15 @@
 					<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
 						<div id="scroll1" class="mui-scroll-wrapper">
 							<div class="mui-scroll">
-								<div class="mui-input-row mui-search">
-								    <input id="searchInput" onchange="onSearchChange(this)" type="search" class="mui-input" placeholder="按标题搜索">
+								<div class="mui-row">
+									<div class="mui-col-xs-10 mui-col-sm-10">
+										<input style="width: 100%;" id="searchInput" onchange="onSearchChange()" type="search" class="mui-input" placeholder="按标题搜索">
+									</div>
+									<div class="mui-col-xs-2 mui-col-sm-2">
+										<button style="width: 100%;" type="button" onclick="onSearchChange()" class="mui-btn mui-btn-primary">
+								            搜索
+								        </button>
+									</div>
 								</div>
 								<ul id="vue1" class="mui-table-view">
 									<div v-for="item in items" >
@@ -338,7 +345,8 @@
 				})
 			}
 			
-			function onSearchChange(element) {
+			function onSearchChange() {
+				var element = document.getElementById("searchInput");
 				getSuggests(suggests,1,'CY', element.value);
 			}
 
@@ -455,6 +463,7 @@
 					indicators: true, //是否显示滚动条
 					deceleration:deceleration
 				});
+				mui('.mui-slider').slider().stopped = true;
 			})
 
 			mui.plusReady(function() {
