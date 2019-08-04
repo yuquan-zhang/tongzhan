@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link href="../../css/mui.min.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+</head>
+
+<body>
+<header class="mui-bar mui-bar-nav">
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+    <h1 class="mui-title">打分建言</h1>
+</header>
+<div class="mui-content">
+    <ul id="vue1" class="mui-table-view">
+        <div v-for="item in items" >
+            <div class="mui-card">
+                <div class="mui-card-header">
+                    <b>标题：{{item.title}}</b>
+                </div>
+                <div class="mui-card-content">
+                    <div class="mui-card-content-inner">
+                        <p><b>内容：</b>{{item.content}}</p>
+                    </div>
+                </div>
+				<div class="mui-card-footer">
+				    <a style="color: lightcoral;"><b>得分：</b>{{item.score}}</a>
+				</div>
+            </div>
+        </div>
+    </ul>
+</div>
+<script src="../../js/mui.min.js"></script>
+<script src="../../js/vue.min.js"></script>
+<script src="../../js/app.js"></script>
+<script type="text/javascript">
+    mui.init({
+        swipeBack: false,
+    });
+
+    var vm = new Vue({
+        el: "#vue1",
+        data: {
+            items: []
+        }
+    });
+
+    function getScoredSuggests(vue) {
+        App.ajax({
+            line: 55,
+            url: "/front/suggest/getPubList.do",
+            data:{},
+            success: function(data) {
+				console.log(JSON.stringify(data));
+                var others = data.data || [];
+                vue.items = others || [];
+            }
+        })
+    }
+
+    window.addEventListener("data_transfer",function(e){
+        getScoredSuggests(vm);
+    },false);
+
+    mui.plusReady(function() {
+		
+    })
+</script>
+</body>
+
+</html>

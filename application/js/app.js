@@ -4,7 +4,7 @@
 	owner.config = {
 		// serverUrl:"https://tongzhan.info",
 		serverUrl:"http://211.136.105.83"
-		// serverUrl:"http://192.168.1.102:8088"
+		// serverUrl:"http://192.168.0.105:8088"
 	};
 	
 	owner.util = {
@@ -157,7 +157,7 @@
 			data:options.data || {},
 			dataType:'json',//服务器返回json格式数据
 			type:'post',//HTTP请求类型
-			timeout:10000,//超时时间设置为10秒；
+			timeout:30000,//超时时间设置为30秒；
 			headers:{
 				'Content-Type':'application/x-www-form-urlencoded',
 				'req-origin':'html5+app',

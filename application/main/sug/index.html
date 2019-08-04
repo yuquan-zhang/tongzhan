@@ -231,7 +231,14 @@
 										</div>
 										
 									</div>
-									<div class="mui-col-sm-2 mui-col-xs-12" style="color: dodgerblue;" @tap="openDraft()">
+									<div class="mui-col-sm-2 mui-col-xs-12" style="color: dodgerblue;border-top: 1px solid #f3f3f3;" @tap="openScored()">
+										<li class="mui-table-view-cell">
+											<a class="mui-navigate-right">
+												<b><span class="mui-icon"></span>打分建言</b>
+											</a>
+										</li>
+									</div>
+									<div class="mui-col-sm-2 mui-col-xs-12" style="color: dodgerblue;border-top: 1px solid #f3f3f3;" @tap="openDraft()">
 										<li class="mui-table-view-cell">
 											<a class="mui-navigate-right">
 												<b><span class="mui-icon"></span>我的草稿箱</b>
@@ -262,12 +269,14 @@
 			var thisView = {};
 			var sDetailView = null;
 			var draftView = null;
+			var scoredView = null;
 			var submitView = null;
 			var mySuggestListView = null;
 			var messageView = null;
 			
 			var openDetail = function(){};
             var openDraft = function(){};
+			var openScored = function(){};
             var openSubmit = function(){};
             var openMySuggestList = function(){};
             var openMessage = function(){};
@@ -490,7 +499,7 @@
 					indicators: true, //是否显示滚动条
 					deceleration:deceleration
 				});
-				mui('.mui-slider').slider().stopped = true;
+				// mui('.mui-slider').slider().stopped = true;
 			})
 
 			mui.plusReady(function() {
@@ -549,6 +558,15 @@
 					extras:{}//自定义扩展参数
 				})
 				
+				scoredView = mui.preload({
+					url:'scored.html',
+					id: App.name + 'sug/scored.html',
+					styles: {
+						popGesture: 'hide'
+					},//窗口参数
+					extras:{}//自定义扩展参数
+				})
+				
 				submitView = mui.preload({
 					url:'submit.html',
 					id: App.name + 'sug/submit.html',
@@ -599,6 +617,13 @@
                     })
                     draftView.show("pop-in",300);
                 }
+				
+				openScored = function() {
+				    mui.fire(scoredView,"data_transfer",{
+				        data:thisView.data,
+				    })
+				    scoredView.show("pop-in",300);
+				}
 
                 openMySuggestList = function() {
                     mui.fire(mySuggestListView,"data_transfer",{
